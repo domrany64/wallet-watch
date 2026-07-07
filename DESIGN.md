@@ -36,7 +36,7 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
     /settings
       monthlyIncome: 8000
       currency: "USD"
-      spenders: ["Damon", "Sarah"]
+      spenders: ["Damon", "Sedi"]
     /cards
       /<pushId>
         name: "Chase Checking Debit"
