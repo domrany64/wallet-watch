@@ -1,6 +1,6 @@
 # 💰 WalletWatch
 
-**Live site:** [https://domrany64.github.io/WalletWatch/](https://domrany64.github.io/WalletWatch/)
+**Live site:** [https://domrany64.github.io/wallet-watch/](https://domrany64.github.io/wallet-watch/)
 
 A family budget and expense tracker that gives you a clear, real-time view of where your money goes each month. Know exactly how much you can still spend — before it's too late.
 
@@ -67,7 +67,7 @@ Apply these rules in your Firebase Console → Realtime Database → Rules:
 ## Tools
 
 - **Helpers page:** [/helpers/](https://domrany64.github.io/wallet-watch/helpers/) — Index of all helper tools
-- **Import Bank CSV:** [/import-csv.html](https://domrany64.github.io/wallet-watch/import-csv.html) — Bulk import transactions from any bank statement CSV (Chase, Bank of America, Capital One, etc.)
+- **Import Bank CSV:** [/import-csv.html](https://domrany64.github.io/wallet-watch/import-csv.html) — Bulk import transactions from any bank statement CSV
 
 ## License
 
