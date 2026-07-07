@@ -65,12 +65,12 @@
     <h1>📥 Import Bank Statement</h1>
     <p class="subtitle">Upload a CSV from your bank and map columns to import transactions into WalletWatch. <a href="index.html">← Back</a></p>
 
-    <!-- Login -->
-    <div class="login-bar">
+    <!-- Login (only shown if not already authenticated) -->
+    <div class="login-bar" id="loginBar">
         <input type="email" id="loginEmail" placeholder="Email">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="btn-primary" id="loginBtn" style="padding: 0.4rem 1rem">Login</button>
-        <span class="status" id="loginStatus">Not logged in</span>
+        <span class="status" id="loginStatus">Checking auth...</span>
     </div>
 
     <!-- Drop zone -->
@@ -229,27 +229,21 @@
         // Auth
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
-            const status = document.getElementById('loginStatus');
+            const loginBar = document.getElementById('loginBar');
             if (user) {
-                status.textContent = `Logged in as ${user.email}`;
-                status.className = 'status ok';
-                document.getElementById('loginBtn').textContent = 'Logout';
+                loginBar.style.display = 'none';
                 // Load user data for cards/spenders
                 const snap = await get(ref(db, `households/${user.uid}`));
                 userData = snap.val() || {};
                 populateAssignFields();
             } else {
-                status.textContent = 'Not logged in';
-                status.className = 'status';
+                loginBar.style.display = '';
+                document.getElementById('loginStatus').textContent = 'Login required to import';
                 document.getElementById('loginBtn').textContent = 'Login';
             }
         });
 
         document.getElementById('loginBtn').addEventListener('click', () => {
-            if (currentUser) {
-                auth.signOut();
-                return;
-            }
             const email = document.getElementById('loginEmail').value;
             const pw = document.getElementById('loginPassword').value;
             signInWithEmailAndPassword(auth, email, pw).catch(() => {
