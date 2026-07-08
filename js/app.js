@@ -390,14 +390,14 @@ function renderWelcome() {
 function renderDashboard() {
     const income = Number(data.settings.monthlyIncome || 0);
     const committed = getActiveRecurringTotal();
-    const discretionary = income - committed;
     const spent = getMonthSpending();
-    const remaining = discretionary - spent;
+    const remaining = income - spent;
     const txns = getMonthTransactions().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-    // Budget bar percentage
-    const pct = discretionary > 0 ? Math.min((spent / discretionary) * 100, 100) : 0;
+    // Budget bar: spent as % of income
+    const pct = income > 0 ? Math.min((spent / income) * 100, 100) : 0;
     const barClass = pct < 60 ? 'safe' : pct < 85 ? 'caution' : 'over';
+    const overBudget = remaining < 0;
     const overBudget = remaining < 0;
 
     // If no settings, show setup prompt
@@ -447,11 +447,6 @@ function renderDashboard() {
                 <div class="value neutral">${fmt(income)}</div>
             </div>
             <div class="summary-card">
-                <div class="label">Committed</div>
-                <div class="value warning">${fmt(committed)}</div>
-                <div class="sub">${Object.values(data.recurring).filter(r => r.active !== false).length} recurring items</div>
-            </div>
-            <div class="summary-card">
                 <div class="label">Spent</div>
                 <div class="value negative">${fmt(spent)}</div>
                 <div class="sub">${expenseTxns.length} expenses</div>
@@ -461,11 +456,16 @@ function renderDashboard() {
                 <div class="value ${overBudget ? 'negative' : 'positive'}">${fmt(remaining)}</div>
                 <div class="sub">${isCurrentMonth ? `Day ${currentDay} of ${totalDays}` : 'Past month'}</div>
             </div>
+            <div class="summary-card">
+                <div class="label">Expected</div>
+                <div class="value warning">${fmt(committed)}</div>
+                <div class="sub">${Object.values(data.recurring).filter(r => r.active !== false).length} recurring items</div>
+            </div>
         </div>
 
         <div class="budget-bar-container">
             <div class="budget-bar-labels">
-                <span>Discretionary: ${fmt(discretionary)}</span>
+                <span>Budget: ${fmt(income)}</span>
                 <span>${overBudget ? 'OVER BUDGET' : Math.round(pct) + '% used'}</span>
             </div>
             <div class="budget-bar">
