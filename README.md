@@ -6,8 +6,9 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 
 ## Features
 
-- **Budget dashboard** — See income, spending, remaining budget, and still-expected recurring items at a glance with a visual progress bar
+- **Budget dashboard** — See income (received vs pending), spending, remaining budget, and still-expected recurring items at a glance with a visual progress bar
 - **Smart "Still Expected"** — Recurring items matched against this month's transactions; only shows what hasn't been paid yet (e.g. "3 of 4 paid")
+- **Dynamic income tracking** — Income calculated from recurring income items; shows how much received vs still pending with clickable detail panel
 - **Transaction tracking** — Quick-add expenses with category, amount, card, spender, and description; income vs expense differentiation
 - **Income & expense classification** — Transactions auto-classified as income (green +$), expense (red -$), or transfer (auto-skipped to avoid double-counting)
 - **Recurring commitments** — Manage fixed monthly items grouped by type: Income, Bills, Subscriptions, Savings, and Investments
@@ -20,7 +21,7 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 - **Per-category breakdown** — See spending distribution across 19 categories (groceries, dining, transport, etc.)
 - **Per-spender breakdown** — See who's spending what on the dashboard
 - **Month navigation** — Browse current and past months with full history
-- **Bank CSV import** — Bulk import transactions from bank statement CSVs with auto-detection for Chase, Citi, Amex, Gap, Nordstrom, Key Bank, US Bank, OnPoint, PayPal, and more
+- **Bank CSV import** — Bulk import transactions from bank statement CSVs with auto-detection and **duplicate skipping** (re-importing the same CSV won't create duplicates)
 - **Smart transfer filtering** — Auto-skips credit card payments and inter-account transfers during import to avoid double-counting
 - **Encrypted backups** — In-app backup/restore with AES-256-GCM password encryption (your data stays private)
 - **Secure by design** — Firebase Auth + per-user database rules; no one sees your data without your login

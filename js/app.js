@@ -381,6 +381,10 @@ window._toggleRecurringDetail = () => {
     const el = document.getElementById('recurringDetail');
     if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
 };
+window._toggleIncomeDetail = () => {
+    const el = document.getElementById('incomeDetail');
+    if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+};
 
 // ===== RENDER: Welcome =====
 function renderWelcome() {
@@ -465,9 +469,70 @@ function getRecurringStatus() {
     };
 }
 
+function getIncomeStatus() {
+    const incomeItems = Object.values(data.recurring).filter(r => r.active !== false && r.type === 'income');
+    const monthTxns = getMonthTransactions().filter(t => t.txnType === 'income');
+    const isCurrentMonth = selectedMonth === getCurrentMonth();
+    const isFutureMonth = selectedMonth > getCurrentMonth();
+    const isPastMonth = selectedMonth < getCurrentMonth();
+    const today = dayOfMonth();
+
+    let totalExpected = 0;
+    let receivedTotal = 0;
+    let receivedCount = 0;
+    let pendingTotal = 0;
+    const items = [];
+
+    incomeItems.forEach(r => {
+        const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
+        const rAmount = Number(r.amount || 0);
+        totalExpected += rAmount;
+
+        let foundInTxns = false;
+        for (const t of monthTxns) {
+            const tDesc = (t.description || '').toUpperCase();
+            const tAmount = Number(t.amount || 0);
+            const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
+            const amountExact = rAmount > 0 && Math.abs(tAmount - rAmount) < 0.01;
+            const rWords = rName.split(/\s+/).filter(w => w.length > 2);
+            const descMatch = rWords.some(w => tDesc.includes(w));
+            const isRoundNumber = rAmount === Math.round(rAmount) && rAmount % 50 === 0;
+            if ((amountClose && descMatch) || (amountExact && !isRoundNumber)) {
+                foundInTxns = true;
+                break;
+            }
+        }
+
+        let status;
+        if (foundInTxns) {
+            status = 'received';
+            receivedCount++;
+            receivedTotal += rAmount;
+        } else if (isFutureMonth) {
+            status = 'pending';
+            pendingTotal += rAmount;
+        } else if (isPastMonth) {
+            status = 'missed';
+            pendingTotal += rAmount;
+        } else {
+            if (r.dueDay && r.dueDay <= today) {
+                status = 'missed';
+            } else {
+                status = 'pending';
+            }
+            pendingTotal += rAmount;
+        }
+
+        items.push({ name: r.name, amount: rAmount, status, dueDay: r.dueDay, cardId: r.cardId });
+    });
+
+    return { totalExpected, receivedTotal, receivedCount, pendingTotal, total: incomeItems.length, items };
+}
+
 // ===== RENDER: Dashboard =====
 function renderDashboard() {
-    const income = Number(data.settings.monthlyIncome || 0);
+    const incomeStatus = getIncomeStatus();
+    const income = incomeStatus.totalExpected || Number(data.settings.monthlyIncome || 0);
     const recurStatus = getRecurringStatus();
     const spent = getMonthSpending();
     const remaining = income - spent;
@@ -520,9 +585,10 @@ function renderDashboard() {
         ${monthNavHtml()}
 
         <div class="summary-grid">
-            <div class="summary-card">
+            <div class="summary-card${incomeStatus.total > 0 ? ' clickable' : ''}" ${incomeStatus.total > 0 ? 'onclick="window._toggleIncomeDetail()"' : ''}>
                 <div class="label">Income</div>
                 <div class="value neutral">${fmt(income)}</div>
+                ${incomeStatus.total > 0 ? `<div class="sub">${fmt(incomeStatus.receivedTotal)} received${incomeStatus.pendingTotal > 0 ? ` • ${fmt(incomeStatus.pendingTotal)} pending` : ''}</div>` : ''}
             </div>
             <div class="summary-card">
                 <div class="label">Spent</div>
@@ -563,6 +629,30 @@ function renderDashboard() {
                 }).join('')}
             </div>
         </div>
+
+        ${incomeStatus.total > 0 ? `
+        <div class="recurring-detail" id="incomeDetail" style="display:none">
+            <div class="card" style="margin-bottom:1.5rem">
+                <div class="card-header">
+                    <span class="card-title">Income Status — ${monthLabel(selectedMonth)}</span>
+                    <button class="btn-icon" onclick="window._toggleIncomeDetail()">✕</button>
+                </div>
+                ${incomeStatus.items.map(item => {
+                    const statusIcon = item.status === 'received' ? '✅' : item.status === 'missed' ? '⚠️' : '⏳';
+                    const statusLabel = item.status === 'received' ? 'Received' : item.status === 'missed' ? 'Missed' : 'Pending';
+                    const statusColor = item.status === 'received' ? 'var(--primary)' : item.status === 'missed' ? 'var(--danger)' : 'var(--warning)';
+                    return `
+                    <div class="recurring-detail-row">
+                        <span class="recurring-detail-icon">${statusIcon}</span>
+                        <span class="recurring-detail-name">${escapeHtml(item.name)}</span>
+                        ${item.dueDay ? `<span class="recurring-detail-meta">Day ${item.dueDay}</span>` : ''}
+                        ${item.cardId ? `<span class="recurring-detail-meta">${getCardName(item.cardId)}</span>` : ''}
+                        <span class="recurring-detail-amount" style="color:var(--primary)">+${fmt(item.amount)}</span>
+                        <span class="recurring-detail-status" style="color:${statusColor}">${statusLabel}</span>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>` : ''}
 
         <div class="budget-bar-container">
             <div class="budget-bar-labels">

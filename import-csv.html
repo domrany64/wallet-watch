@@ -716,25 +716,45 @@
             const progressFill = document.getElementById('progressFill');
             const statusEl = document.getElementById('importStatus');
             log.innerHTML = '';
-            let imported = 0, errors = 0;
+
+            // Load existing transactions for dedup
+            statusEl.textContent = 'Checking for duplicates...';
+            const existingSnap = await get(ref(db, `households/${currentUser.uid}/transactions`));
+            const existingTxns = Object.values(existingSnap.val() || {});
+
+            function isDuplicate(t) {
+                return existingTxns.some(e =>
+                    e.date === t.date &&
+                    Math.abs(Number(e.amount) - t.amount) < 0.01 &&
+                    (e.description || '').toUpperCase().trim() === (t.description || '').toUpperCase().trim()
+                );
+            }
+
+            let imported = 0, skipped = 0, errors = 0;
 
             for (let i = 0; i < parsedTransactions.length; i++) {
                 const t = parsedTransactions[i];
-                try {
-                    await set(push(ref(db, `households/${currentUser.uid}/transactions`)), t);
-                    imported++;
-                    log.innerHTML += `<div class="log-success">✓ ${t.date} — ${t.description} — $${t.amount.toFixed(2)}</div>`;
-                } catch (err) {
-                    errors++;
-                    log.innerHTML += `<div class="log-error">✗ ${t.description}: ${err.message}</div>`;
+                if (isDuplicate(t)) {
+                    skipped++;
+                    log.innerHTML += `<div class="log-skip">⏭ ${t.date} — ${t.description} — $${t.amount.toFixed(2)} (duplicate)</div>`;
+                } else {
+                    try {
+                        await set(push(ref(db, `households/${currentUser.uid}/transactions`)), t);
+                        imported++;
+                        existingTxns.push(t); // add to dedup list for subsequent rows
+                        log.innerHTML += `<div class="log-success">✓ ${t.date} — ${t.description} — $${t.amount.toFixed(2)}</div>`;
+                    } catch (err) {
+                        errors++;
+                        log.innerHTML += `<div class="log-error">✗ ${t.description}: ${err.message}</div>`;
+                    }
                 }
                 progressFill.style.width = `${((i + 1) / parsedTransactions.length) * 100}%`;
                 statusEl.textContent = `${i + 1} / ${parsedTransactions.length}`;
                 log.scrollTop = log.scrollHeight;
             }
 
-            log.innerHTML += `<div class="log-info">— Done: ${imported} imported, ${errors} errors —</div>`;
-            statusEl.textContent = `Done! ${imported} imported`;
+            log.innerHTML += `<div class="log-info">— Done: ${imported} imported, ${skipped} duplicates skipped, ${errors} errors —</div>`;
+            statusEl.textContent = `Done! ${imported} imported, ${skipped} skipped`;
         });
 
         // Clear

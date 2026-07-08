@@ -112,10 +112,12 @@ Each user's data is completely isolated. No public read access.
 ## Budget Calculation
 
 ```
-Monthly Income (from settings)
+Monthly Income (from recurring income items, fallback to settings)
   − Sum of expense transactions for the current month
   = Remaining Budget
 ```
+
+Income is calculated dynamically from recurring items of type "income". The dashboard shows how much has been received vs still pending. Falls back to the manual `monthlyIncome` setting if no income recurring items exist.
 
 Transactions are the **source of truth** for spending. Recurring items are informational — they show what to expect each month but are not deducted separately (to avoid double-counting when a recurring payment also appears as a transaction).
 
@@ -167,7 +169,7 @@ Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card
 
 ### Dashboard
 - Month navigator (← prev / next →) with "Today" button when viewing a non-current month
-- Budget summary cards: Income, Spent, Remaining, Still Expected (with "X of Y paid")
+- Budget summary cards: Income (click for received/pending detail), Spent, Remaining, Still Expected (click for paid/late detail)
 - Visual budget progress bar: spent as % of income (green → yellow → red)
 - Per-category spending chart (horizontal bars, expenses only)
 - Per-spender breakdown (expenses only)
