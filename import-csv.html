@@ -570,8 +570,16 @@
             parsedTransactions = [];
             let skipped = 0;
 
+            // Patterns for auto-classifying transaction types
+            const transferPatterns = /citi card|chase credit|barclaycard|amex epayment|onpoint ccu|funds tran|credit crd|internet trf/i;
+            const paymentPatterns = /payment|thank you|autopay|auto pay|pymt/i;
+
             for (const row of rawRows) {
                 let amount;
+                let txnType = 'expense'; // default
+
+                const desc = (row[descCol] || '').trim();
+                const descLower = desc.toLowerCase();
 
                 if (cdiCol !== null && amountCol !== null) {
                     // Nordstrom-style: amount is always positive, indicator tells direction
@@ -579,53 +587,52 @@
                     if (isNaN(amount) || amount === 0) { skipped++; continue; }
                     const indicator = (row[cdiCol] || '').toLowerCase().trim();
                     if (indicator === 'credit') {
-                        // Credit = payment to card, skip as income
-                        if (skipPositive) { skipped++; continue; }
-                        amount = 0; skipped++; continue;
+                        txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
                     }
-                    // Debit = purchase/expense — keep as-is
                 } else if (debitCol !== null) {
                     // Separate debit/credit columns (Citi, OnPoint, Capital One)
                     const debit = parseFloat((row[debitCol] || '').replace(/[$,]/g, ''));
                     const credit = creditCol !== null ? parseFloat((row[creditCol] || '').replace(/[$,]/g, '')) : NaN;
                     if (!isNaN(debit) && debit !== 0) {
-                        // Debit column has a value — treat as expense
                         amount = Math.abs(debit);
+                        txnType = 'expense';
                     } else if (!isNaN(credit) && credit !== 0) {
-                        // Credit column — check if it's a payment (skip) or a refund (keep)
-                        const desc = (row[descCol] || '').toLowerCase();
-                        const isPayment = /payment|thank you|autopay|auto pay|pymt/.test(desc);
-                        if (isPayment) { skipped++; continue; }
-                        // Actual refund — keep it
                         amount = Math.abs(credit);
+                        txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
                     } else {
                         skipped++;
                         continue;
                     }
                 } else {
-                    // Single amount column
+                    // Single amount column (Key Bank, US Bank, Chase, PayPal, etc.)
                     amount = parseFloat((row[amountCol] || '').replace(/[$,]/g, ''));
                     if (isNaN(amount) || amount === 0) { skipped++; continue; }
 
-                    const desc = (row[descCol] || '').toLowerCase();
-                    const isPayment = /payment|thank you|autopay|auto pay|pymt/.test(desc);
-
                     if (negIsExpense) {
-                        // Negative = expense (Chase, Key Bank, US Bank, PayPal, etc.)
-                        if (amount > 0) {
-                            if (isPayment) { skipped++; continue; }
-                            if (skipPositive) { skipped++; continue; }
+                        if (amount < 0) {
+                            // Negative = outflow
+                            if (transferPatterns.test(descLower) || paymentPatterns.test(descLower)) {
+                                txnType = 'transfer';
+                            } else {
+                                txnType = 'expense';
+                            }
+                        } else {
+                            // Positive = inflow
+                            txnType = 'income';
                         }
-                        amount = Math.abs(amount);
                     } else {
                         // Positive = expense (Amex, Gap)
-                        if (amount < 0) {
-                            if (isPayment) { skipped++; continue; }
-                            if (skipPositive) { skipped++; continue; }
-                            amount = Math.abs(amount);
+                        if (amount > 0) {
+                            txnType = 'expense';
+                        } else {
+                            txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
                         }
                     }
+                    amount = Math.abs(amount);
                 }
+
+                // Skip transfers (credit card payments, inter-account moves)
+                if (txnType === 'transfer') { skipped++; continue; }
 
                 // Parse date
                 const rawDate = row[dateCol] || '';
@@ -637,9 +644,10 @@
                 const category = mapCategory(bankCat) || defaultCat;
 
                 parsedTransactions.push({
-                    amount: Math.round(Math.abs(amount) * 100) / 100,
-                    description: (row[descCol] || '').trim(),
+                    amount: Math.round(amount * 100) / 100,
+                    description: desc,
                     category,
+                    txnType,
                     bankCategory: bankCat || '',
                     cardId,
                     spender,
@@ -650,22 +658,32 @@
             }
 
             // Show stats
-            const totalAmount = parsedTransactions.reduce((s, t) => s + t.amount, 0);
+            const expenses = parsedTransactions.filter(t => t.txnType === 'expense');
+            const incomes = parsedTransactions.filter(t => t.txnType === 'income');
+            const totalExpense = expenses.reduce((s, t) => s + t.amount, 0);
+            const totalIncome = incomes.reduce((s, t) => s + t.amount, 0);
             document.getElementById('stats').innerHTML = `
                 <div class="stat"><div class="stat-num">${parsedTransactions.length}</div><div class="stat-label">Transactions</div></div>
+                <div class="stat"><div class="stat-num">${expenses.length}</div><div class="stat-label">Expenses</div></div>
+                <div class="stat"><div class="stat-num" style="color:#ef4444">$${totalExpense.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total Spent</div></div>
+                <div class="stat"><div class="stat-num">${incomes.length}</div><div class="stat-label">Income</div></div>
+                <div class="stat"><div class="stat-num" style="color:#10b981">$${totalIncome.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total Income</div></div>
                 <div class="stat"><div class="stat-num">${skipped}</div><div class="stat-label">Skipped</div></div>
-                <div class="stat"><div class="stat-num">$${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total</div></div>
             `;
 
             const body = document.getElementById('parsedBody');
-            body.innerHTML = parsedTransactions.map(t => `
-                <tr>
+            body.innerHTML = parsedTransactions.map(t => {
+                const isIncome = t.txnType === 'income';
+                const color = isIncome ? 'color:#10b981' : 'color:#ef4444';
+                const sign = isIncome ? '+' : '-';
+                const badge = isIncome ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.7rem;font-weight:600">INCOME</span>' : '';
+                return `<tr>
                     <td>${t.date}</td>
-                    <td>${t.description}</td>
+                    <td>${t.description} ${badge}</td>
                     <td>${CATEGORIES[t.category] || t.category}${t.bankCategory ? ` <span style="color:#64748b">(${t.bankCategory})</span>` : ''}</td>
-                    <td>$${t.amount.toFixed(2)}</td>
-                </tr>
-            `).join('');
+                    <td style="${color};font-weight:600">${sign}$${t.amount.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
 
             document.getElementById('parsedPreview').style.display = '';
             document.getElementById('importBtn').disabled = !currentUser || parsedTransactions.length === 0;

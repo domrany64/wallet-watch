@@ -304,7 +304,15 @@ function getActiveRecurringTotal() {
 }
 
 function getMonthSpending() {
-    return getMonthTransactions().reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    return getMonthTransactions()
+        .filter(t => t.txnType !== 'income')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+}
+
+function getMonthIncome() {
+    return getMonthTransactions()
+        .filter(t => t.txnType === 'income')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 }
 
 function categoryOptions() {
@@ -404,18 +412,19 @@ function renderDashboard() {
         return;
     }
 
-    // Per-spender breakdown
+    // Per-spender breakdown (expenses only)
+    const expenseTxns = txns.filter(t => t.txnType !== 'income');
     const spenderTotals = {};
     getSpenders().forEach(s => spenderTotals[s] = 0);
-    txns.forEach(t => {
+    expenseTxns.forEach(t => {
         if (t.spender && spenderTotals[t.spender] !== undefined) {
             spenderTotals[t.spender] += Number(t.amount || 0);
         }
     });
 
-    // Per-category breakdown
+    // Per-category breakdown (expenses only)
     const catTotals = {};
-    txns.forEach(t => {
+    expenseTxns.forEach(t => {
         const cat = t.category || 'other';
         catTotals[cat] = (catTotals[cat] || 0) + Number(t.amount || 0);
     });
@@ -444,7 +453,7 @@ function renderDashboard() {
             <div class="summary-card">
                 <div class="label">Spent</div>
                 <div class="value negative">${fmt(spent)}</div>
-                <div class="sub">${txns.length} transactions</div>
+                <div class="sub">${expenseTxns.length} expenses</div>
             </div>
             <div class="summary-card">
                 <div class="label">Remaining</div>
@@ -507,11 +516,12 @@ function renderDashboard() {
 }
 
 function txnItemHtml(t) {
+    const isIncome = t.txnType === 'income';
     return `
-        <div class="txn-item">
+        <div class="txn-item ${isIncome ? 'txn-income' : ''}">
             <div class="txn-icon">${getCategoryIcon(t.category)}</div>
             <div class="txn-details">
-                <div class="txn-desc">${escapeHtml(t.description || getCategoryLabel(t.category))}</div>
+                <div class="txn-desc">${escapeHtml(t.description || getCategoryLabel(t.category))}${isIncome ? ' <span class="txn-type-badge income">INCOME</span>' : ''}</div>
                 <div class="txn-meta">
                     <span>${getCategoryLabel(t.category)}</span>
                     <span>•</span>
@@ -522,7 +532,7 @@ function txnItemHtml(t) {
                     <span>${t.date || ''}</span>
                 </div>
             </div>
-            <div class="txn-amount">${fmt(t.amount)}</div>
+            <div class="txn-amount ${isIncome ? 'txn-amount-income' : ''}">${isIncome ? '+' : '-'}${fmt(t.amount)}</div>
             <div class="txn-actions">
                 <button class="btn-icon" onclick="window._editTxn('${t.id}')" title="Edit">✏️</button>
                 <button class="btn-icon" onclick="window._deleteTxn('${t.id}')" title="Delete">🗑️</button>
@@ -626,6 +636,7 @@ function handleQuickAdd(e) {
         description: document.getElementById('qaDesc').value.trim(),
         cardId: document.getElementById('qaCard').value,
         spender: document.getElementById('qaSpender').value,
+        txnType: 'expense',
         date,
         month,
         createdAt: Date.now()
@@ -900,9 +911,9 @@ function renderCards() {
     const cards = Object.entries(data.cards).map(([id, c]) => ({ id, ...c }));
     const monthTxns = getMonthTransactions();
 
-    // Per-card spending
+    // Per-card spending (expenses only)
     const cardSpending = {};
-    monthTxns.forEach(t => {
+    monthTxns.filter(t => t.txnType !== 'income').forEach(t => {
         if (t.cardId) cardSpending[t.cardId] = (cardSpending[t.cardId] || 0) + Number(t.amount || 0);
     });
 

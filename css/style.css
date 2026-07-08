@@ -382,6 +382,28 @@ body {
     opacity: 1;
 }
 
+.txn-item.txn-income {
+    border-left: 3px solid var(--primary);
+}
+
+.txn-amount-income {
+    color: var(--primary) !important;
+}
+
+.txn-type-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+}
+
+.txn-type-badge.income {
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
 /* ===== Quick Add Form ===== */
 .quick-add {
     background: var(--surface);
