@@ -391,45 +391,55 @@ function getRecurringStatus() {
     const recurringItems = Object.values(data.recurring).filter(r => r.active !== false && r.type !== 'income');
     const monthTxns = getMonthTransactions().filter(t => t.txnType !== 'income');
     const isCurrentMonth = selectedMonth === getCurrentMonth();
-    const today = isCurrentMonth ? dayOfMonth() : daysInMonth(selectedMonth);
+    const isFutureMonth = selectedMonth > getCurrentMonth();
+    const isPastMonth = selectedMonth < getCurrentMonth();
+    const today = dayOfMonth();
 
     let paidCount = 0;
     let paidTotal = 0;
+    let lateCount = 0;
+    let lateTotal = 0;
     let unpaidTotal = 0;
 
     recurringItems.forEach(r => {
-        let isPaid = false;
         const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
         const rAmount = Number(r.amount || 0);
 
-        // Try matching against transactions by description keywords + similar amount
+        // Try matching against actual transactions
+        let foundInTxns = false;
         for (const t of monthTxns) {
             const tDesc = (t.description || '').toUpperCase();
             const tAmount = Number(t.amount || 0);
-
-            // Amount within 20% tolerance
             const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
-
-            // Description match: check if key words from recurring name appear in transaction
             const rWords = rName.split(/\s+/).filter(w => w.length > 2);
             const descMatch = rWords.some(w => tDesc.includes(w));
-
             if (amountClose && descMatch) {
-                isPaid = true;
+                foundInTxns = true;
                 break;
             }
         }
 
-        // Fallback: if due day is set and has passed
-        if (!isPaid && r.dueDay && r.dueDay <= today) {
-            isPaid = true;
-        }
-
-        if (isPaid) {
+        if (foundInTxns) {
+            // Found a matching transaction → paid
             paidCount++;
             paidTotal += rAmount;
-        } else {
+        } else if (isFutureMonth) {
+            // Future month → everything is expected
             unpaidTotal += rAmount;
+        } else if (isPastMonth) {
+            // Past month, no matching transaction → late/missed
+            lateCount++;
+            lateTotal += rAmount;
+        } else {
+            // Current month, not found in transactions
+            if (r.dueDay && r.dueDay <= today) {
+                // Due day passed but no transaction → late
+                lateCount++;
+                lateTotal += rAmount;
+            } else {
+                // Due day hasn't come yet (or no due day set) → still expected
+                unpaidTotal += rAmount;
+            }
         }
     });
 
@@ -437,7 +447,9 @@ function getRecurringStatus() {
         total: recurringItems.length,
         paidCount,
         paidTotal,
-        unpaidCount: recurringItems.length - paidCount,
+        lateCount,
+        lateTotal,
+        unpaidCount: recurringItems.length - paidCount - lateCount,
         unpaidTotal
     };
 }
@@ -514,7 +526,7 @@ function renderDashboard() {
             <div class="summary-card">
                 <div class="label">Still Expected</div>
                 <div class="value ${recurStatus.unpaidTotal > 0 ? 'warning' : 'positive'}">${fmt(recurStatus.unpaidTotal)}</div>
-                <div class="sub">${recurStatus.paidCount} of ${recurStatus.total} paid</div>
+                <div class="sub">${recurStatus.paidCount} of ${recurStatus.total} paid${recurStatus.lateCount > 0 ? ` • <span style="color:var(--danger)">${recurStatus.lateCount} late</span>` : ''}</div>
             </div>
         </div>
 
