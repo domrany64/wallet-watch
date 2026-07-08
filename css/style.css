@@ -515,6 +515,10 @@ body {
 
 .card-item.debit::before { background: var(--primary); }
 .card-item.credit::before { background: var(--info); }
+.card-item.savings::before { background: #8b5cf6; }
+.card-item.investment::before { background: #f59e0b; }
+.card-item.loan::before { background: #ef4444; }
+.card-item.other::before { background: var(--text-muted); }
 
 .card-item-header {
     display: flex;
@@ -539,6 +543,10 @@ body {
 
 .card-type-badge.debit { background: var(--primary-muted); color: var(--primary); }
 .card-type-badge.credit { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+.card-type-badge.savings { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.card-type-badge.investment { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.card-type-badge.loan { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.card-type-badge.other { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
 
 .card-item-details {
     font-size: 0.85rem;

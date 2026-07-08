@@ -101,6 +101,58 @@ const RECURRING_TYPES = {
     investment: { icon: '📈', label: 'Investments' }
 };
 
+const ACCOUNT_TYPES = {
+    debit: { label: 'Debit / Checking', color: 'var(--primary)' },
+    credit: { label: 'Credit Card', color: 'var(--info)' },
+    savings: { label: 'Savings', color: '#8b5cf6' },
+    investment: { label: 'Investment', color: '#f59e0b' },
+    loan: { label: 'Loan / Mortgage', color: '#ef4444' },
+    other: { label: 'Other', color: 'var(--text-muted)' }
+};
+
+const INSTITUTIONS = {
+    keybank: { icon: '🔑', label: 'Key Bank' },
+    usbank: { icon: '🏦', label: 'US Bank' },
+    onpoint: { icon: '📍', label: 'OnPoint' },
+    upgrade: { icon: '⬆️', label: 'Upgrade' },
+    chase: { icon: '🏛️', label: 'Chase' },
+    citi: { icon: '🌐', label: 'Citi' },
+    amex: { icon: '💎', label: 'Amex' },
+    gap: { icon: '👔', label: 'Gap' },
+    nordstrom: { icon: '🛍️', label: 'Nordstrom' },
+    etrade: { icon: '📊', label: 'E*Trade' },
+    fidelity: { icon: '🏢', label: 'Fidelity' },
+    embark: { icon: '🎓', label: 'Embark Oregon' },
+    intel: { icon: '💻', label: 'Intel (MyPaymentVault)' },
+    paypal: { icon: '🅿️', label: 'PayPal' },
+    mrcooper: { icon: '🏠', label: 'Mr. Cooper' },
+    nelnet: { icon: '🎓', label: 'Nelnet' },
+    bofa: { icon: '🏦', label: 'Bank of America' },
+    wellsfargo: { icon: '🐴', label: 'Wells Fargo' },
+    capitalone: { icon: '🏦', label: 'Capital One' },
+    discover: { icon: '🟠', label: 'Discover' },
+    other: { icon: '🏦', label: 'Other' }
+};
+
+const PRESET_ACCOUNTS = [
+    { name: 'Key Bank Checking', institution: 'keybank', type: 'debit' },
+    { name: 'US Bank Checking', institution: 'usbank', type: 'debit' },
+    { name: 'OnPoint Checking', institution: 'onpoint', type: 'debit' },
+    { name: 'Upgrade Savings', institution: 'upgrade', type: 'savings' },
+    { name: 'Chase Credit Card', institution: 'chase', type: 'credit' },
+    { name: 'Citi Credit Card', institution: 'citi', type: 'credit' },
+    { name: 'Amex Credit Card', institution: 'amex', type: 'credit' },
+    { name: 'Gap Credit Card', institution: 'gap', type: 'credit' },
+    { name: 'Nordstrom Credit Card', institution: 'nordstrom', type: 'credit' },
+    { name: 'E*Trade', institution: 'etrade', type: 'investment' },
+    { name: 'Fidelity 401(k)', institution: 'fidelity', type: 'investment' },
+    { name: 'Embark Oregon 529', institution: 'embark', type: 'investment' },
+    { name: 'Intel Recognition', institution: 'intel', type: 'other' },
+    { name: 'PayPal', institution: 'paypal', type: 'other' },
+    { name: 'Mr. Cooper Mortgage', institution: 'mrcooper', type: 'loan' },
+    { name: 'Nelnet Student Loans', institution: 'nelnet', type: 'loan' }
+];
+
 // ===== Firebase Listeners =====
 function setupListeners() {
     detachListeners();
@@ -210,7 +262,25 @@ function getSpenders() {
 function getCardName(cardId) {
     if (!cardId || !data.cards[cardId]) return '—';
     const c = data.cards[cardId];
-    return `${c.name}${c.lastFour ? ' ••' + c.lastFour : ''}`;
+    const inst = INSTITUTIONS[c.institution];
+    const icon = inst ? inst.icon + ' ' : '';
+    return `${icon}${c.name}${c.lastFour ? ' ••' + c.lastFour : ''}`;
+}
+
+function getInstitutionIcon(instKey) {
+    return INSTITUTIONS[instKey]?.icon || '🏦';
+}
+
+function accountTypeOptions(selected) {
+    return Object.entries(ACCOUNT_TYPES)
+        .map(([k, v]) => `<option value="${k}" ${selected === k ? 'selected' : ''}>${v.label}</option>`)
+        .join('');
+}
+
+function institutionOptions(selected) {
+    return '<option value="">— select —</option>' + Object.entries(INSTITUTIONS)
+        .map(([k, v]) => `<option value="${k}" ${selected === k ? 'selected' : ''}>${v.icon} ${v.label}</option>`)
+        .join('');
 }
 
 function getCategoryIcon(cat) {
@@ -836,60 +906,83 @@ function renderCards() {
         if (t.cardId) cardSpending[t.cardId] = (cardSpending[t.cardId] || 0) + Number(t.amount || 0);
     });
 
+    // Group cards by type
+    const grouped = {};
+    Object.keys(ACCOUNT_TYPES).forEach(t => grouped[t] = []);
+    cards.forEach(c => {
+        const type = c.type || 'other';
+        if (!grouped[type]) grouped[type] = [];
+        grouped[type].push(c);
+    });
+
     mainContent.innerHTML = `
         <div class="section-header">
-            <h2 class="section-title">💳 Cards</h2>
-            <button class="btn btn-primary btn-sm" onclick="window._addCard()">+ Add Card</button>
+            <h2 class="section-title">💳 Accounts & Cards</h2>
+            <div style="display:flex;gap:0.5rem">
+                ${cards.length === 0 ? `<button class="btn btn-secondary btn-sm" onclick="window._setupPresets()">⚡ Quick Setup</button>` : ''}
+                <button class="btn btn-primary btn-sm" onclick="window._addCard()">+ Add</button>
+            </div>
         </div>
 
         ${monthNavHtml()}
 
-        <div class="cards-grid">
-            ${cards.length === 0 ? `
-                <div class="empty-state" style="grid-column: 1/-1">
-                    <div class="emoji">💳</div>
-                    <h2>No cards added</h2>
-                    <p>Add your debit and credit cards to track per-card spending.</p>
-                </div>` :
-                cards.map(c => {
-                    const spent = cardSpending[c.id] || 0;
-                    const isCredit = c.type === 'credit';
-                    const limit = Number(c.creditLimit || 0);
-                    const utilPct = isCredit && limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
-                    const utilClass = utilPct < 30 ? 'safe' : utilPct < 70 ? 'caution' : 'over';
-
-                    return `
-                        <div class="card-item ${c.type}">
-                            <div class="card-item-actions">
-                                <button class="btn-icon" onclick="window._editCard('${c.id}')" title="Edit">✏️</button>
-                                <button class="btn-icon" onclick="window._deleteCard('${c.id}')" title="Delete">🗑️</button>
-                            </div>
-                            <div class="card-item-header">
-                                <span class="card-item-name">${escapeHtml(c.name)}</span>
-                                <span class="card-type-badge ${c.type}">${c.type}</span>
-                            </div>
-                            <div class="card-item-details">
-                                <span>Holder: ${escapeHtml(c.holder || '—')}</span>
-                                ${c.lastFour ? `<span>•••• ${escapeHtml(c.lastFour)}</span>` : ''}
-                                ${isCredit && limit ? `<span>Limit: ${fmt(limit)}</span>` : ''}
-                            </div>
-                            <div class="card-spending">
-                                <span class="card-spending-label">Spent this month</span>
-                                <span class="card-spending-value">${fmt(spent)}</span>
-                            </div>
-                            ${isCredit && limit ? `
-                                <div class="card-utilization">
-                                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted)">
-                                        <span>Utilization</span>
-                                        <span>${Math.round(utilPct)}%</span>
-                                    </div>
-                                    <div class="card-utilization-bar">
-                                        <div class="card-utilization-fill budget-bar-fill ${utilClass}" style="width: ${utilPct}%"></div>
-                                    </div>
-                                </div>` : ''}
-                        </div>`;
-                }).join('')}
-        </div>
+        ${cards.length === 0 ? `
+            <div class="empty-state">
+                <div class="emoji">💳</div>
+                <h2>No accounts added</h2>
+                <p>Click <strong>Quick Setup</strong> to add all your accounts at once, or add them one by one.</p>
+            </div>` :
+            Object.entries(ACCOUNT_TYPES).map(([type, cfg]) => {
+                const group = grouped[type] || [];
+                if (group.length === 0) return '';
+                return `
+                    <div class="recurring-group">
+                        <div class="recurring-group-title">${cfg.label} (${group.length})</div>
+                        <div class="cards-grid">
+                            ${group.map(c => {
+                                const spent = cardSpending[c.id] || 0;
+                                const isCredit = c.type === 'credit';
+                                const limit = Number(c.creditLimit || 0);
+                                const utilPct = isCredit && limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
+                                const utilClass = utilPct < 30 ? 'safe' : utilPct < 70 ? 'caution' : 'over';
+                                const inst = INSTITUTIONS[c.institution];
+                                const instIcon = inst ? inst.icon : '';
+                                const instLabel = inst ? inst.label : '';
+                                return `
+                                    <div class="card-item ${c.type}">
+                                        <div class="card-item-actions">
+                                            <button class="btn-icon" onclick="window._editCard('${c.id}')" title="Edit">✏️</button>
+                                            <button class="btn-icon" onclick="window._deleteCard('${c.id}')" title="Delete">🗑️</button>
+                                        </div>
+                                        <div class="card-item-header">
+                                            <span class="card-item-name">${instIcon ? instIcon + ' ' : ''}${escapeHtml(c.name)}</span>
+                                            <span class="card-type-badge ${c.type}">${ACCOUNT_TYPES[c.type]?.label || c.type}</span>
+                                        </div>
+                                        <div class="card-item-details">
+                                            ${instLabel ? `<span>${instLabel}</span>` : ''}
+                                            <span>Holder: ${escapeHtml(c.holder || '—')}</span>
+                                            ${c.lastFour ? `<span>•••• ${escapeHtml(c.lastFour)}</span>` : ''}
+                                            ${isCredit && limit ? `<span>Limit: ${fmt(limit)}</span>` : ''}
+                                        </div>
+                                        <div class="card-spending">
+                                            <span class="card-spending-label">Spent this month</span>
+                                            <span class="card-spending-value">${fmt(spent)}</span>
+                                        </div>
+                                        ${isCredit && limit ? `
+                                            <div class="card-utilization">
+                                                <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted)">
+                                                    <span>Utilization</span>
+                                                    <span>${Math.round(utilPct)}%</span>
+                                                </div>
+                                                <div class="card-utilization-bar">
+                                                    <div class="card-utilization-fill budget-bar-fill ${utilClass}" style="width: ${utilPct}%"></div>
+                                                </div>
+                                            </div>` : ''}
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+            }).join('')}
     `;
 }
 
@@ -897,16 +990,17 @@ function cardFormHtml(c = {}) {
     return `
         <form id="cardForm" class="modal-form">
             <div class="form-group">
-                <label for="cName">Card Name</label>
-                <input type="text" id="cName" required value="${escapeHtml(c.name || '')}" placeholder="e.g. Chase Checking Debit">
+                <label for="cInstitution">Institution</label>
+                <select id="cInstitution">${institutionOptions(c.institution)}</select>
+            </div>
+            <div class="form-group">
+                <label for="cName">Account Name</label>
+                <input type="text" id="cName" required value="${escapeHtml(c.name || '')}" placeholder="e.g. Chase Checking">
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label for="cType">Type</label>
-                    <select id="cType" required>
-                        <option value="debit" ${c.type === 'debit' || !c.type ? 'selected' : ''}>Debit</option>
-                        <option value="credit" ${c.type === 'credit' ? 'selected' : ''}>Credit</option>
-                    </select>
+                    <select id="cType" required>${accountTypeOptions(c.type || 'debit')}</select>
                 </div>
                 <div class="form-group">
                     <label for="cLastFour">Last 4 Digits</label>
@@ -931,11 +1025,12 @@ function cardFormHtml(c = {}) {
 }
 
 window._addCard = () => {
-    showModal('Add Card', cardFormHtml());
+    showModal('Add Account', cardFormHtml());
     document.getElementById('cardForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const card = {
             name: document.getElementById('cName').value.trim(),
+            institution: document.getElementById('cInstitution').value,
             type: document.getElementById('cType').value,
             lastFour: document.getElementById('cLastFour').value.trim(),
             holder: document.getElementById('cHolder').value,
@@ -943,26 +1038,47 @@ window._addCard = () => {
             active: true,
             createdAt: Date.now()
         };
-        set(push(dbRef('cards')), card).then(() => { hideModal(); showToast('Card added'); });
+        set(push(dbRef('cards')), card).then(() => { hideModal(); showToast('Account added'); });
     });
 };
 
 window._editCard = (id) => {
     const c = data.cards[id];
     if (!c) return;
-    showModal('Edit Card', cardFormHtml(c));
+    showModal('Edit Account', cardFormHtml(c));
     document.getElementById('cHolder').value = c.holder || '';
 
     document.getElementById('cardForm').addEventListener('submit', (e) => {
         e.preventDefault();
         update(dbRef(`cards/${id}`), {
             name: document.getElementById('cName').value.trim(),
+            institution: document.getElementById('cInstitution').value,
             type: document.getElementById('cType').value,
             lastFour: document.getElementById('cLastFour').value.trim(),
             holder: document.getElementById('cHolder').value,
             creditLimit: parseFloat(document.getElementById('cLimit').value) || null
-        }).then(() => { hideModal(); showToast('Card updated'); });
+        }).then(() => { hideModal(); showToast('Account updated'); });
     });
+};
+
+// Quick Setup: add all preset accounts at once
+window._setupPresets = async () => {
+    if (!confirm(`Add ${PRESET_ACCOUNTS.length} preset accounts (Key Bank, Chase, Citi, Amex, E*Trade, etc.)?`)) return;
+    const promises = PRESET_ACCOUNTS.map(preset => {
+        const card = {
+            name: preset.name,
+            institution: preset.institution,
+            type: preset.type,
+            lastFour: '',
+            holder: getSpenders()[0] || '',
+            creditLimit: null,
+            active: true,
+            createdAt: Date.now()
+        };
+        return set(push(dbRef('cards')), card);
+    });
+    await Promise.all(promises);
+    showToast(`${PRESET_ACCOUNTS.length} accounts added!`);
 };
 
 window._deleteCard = (id) => {

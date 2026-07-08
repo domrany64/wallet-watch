@@ -90,6 +90,28 @@
     <!-- Column mapping -->
     <div id="mappingSection" style="display:none">
         <div class="mapping-section">
+            <div class="mapping-title">Bank Format Preset</div>
+            <div class="mapping-grid">
+                <div class="mapping-group">
+                    <label>Auto-detect from bank</label>
+                    <select id="bankPreset" onchange="applyPreset()">
+                        <option value="">— Manual mapping —</option>
+                        <option value="chase_credit">Chase Credit Card</option>
+                        <option value="chase_debit">Chase Checking/Debit</option>
+                        <option value="citi">Citi Credit Card</option>
+                        <option value="amex">Amex (American Express)</option>
+                        <option value="keybank">Key Bank</option>
+                        <option value="usbank">US Bank</option>
+                        <option value="bofa">Bank of America</option>
+                        <option value="capitalone">Capital One</option>
+                        <option value="wellsfargo">Wells Fargo</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="discover">Discover</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="mapping-section">
             <div class="mapping-title">Map CSV Columns</div>
             <div class="mapping-grid">
                 <div class="mapping-group">
@@ -271,6 +293,105 @@
             catSel.value = 'other';
         }
 
+        // ===== Bank Format Presets =====
+        // Maps: { date: header, desc: header, amount: header, debit: header, credit: header, category: header }
+        const BANK_PRESETS = {
+            chase_credit: {
+                label: 'Chase Credit Card',
+                date: 'Transaction Date', desc: 'Description', amount: 'Amount', category: 'Category',
+                amountNegIsExpense: true
+            },
+            chase_debit: {
+                label: 'Chase Checking',
+                date: 'Posting Date', desc: 'Description', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            citi: {
+                label: 'Citi Credit Card',
+                date: 'Date', desc: 'Description', debit: 'Debit', credit: 'Credit'
+            },
+            amex: {
+                label: 'Amex',
+                date: 'Date', desc: 'Description', amount: 'Amount',
+                amountNegIsExpense: false // Amex: positive = expense
+            },
+            keybank: {
+                label: 'Key Bank',
+                date: 'Date', desc: 'Description', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            usbank: {
+                label: 'US Bank',
+                date: 'Date', desc: 'Name', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            bofa: {
+                label: 'Bank of America',
+                date: 'Date', desc: 'Description', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            capitalone: {
+                label: 'Capital One',
+                date: 'Transaction Date', desc: 'Description', debit: 'Debit', credit: 'Credit', category: 'Category'
+            },
+            wellsfargo: {
+                label: 'Wells Fargo',
+                date: 'Date', desc: 'Description', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            paypal: {
+                label: 'PayPal',
+                date: 'Date', desc: 'Name', amount: 'Gross',
+                amountNegIsExpense: true
+            },
+            discover: {
+                label: 'Discover',
+                date: 'Trans. Date', desc: 'Description', amount: 'Amount', category: 'Category',
+                amountNegIsExpense: true
+            }
+        };
+
+        function autoDetectBank() {
+            const joined = headers.join('|').toLowerCase();
+            let detected = '';
+            if (joined.includes('transaction date') && joined.includes('post date') && joined.includes('category'))
+                detected = 'chase_credit';
+            else if (joined.includes('posting date') && joined.includes('details'))
+                detected = 'chase_debit';
+            else if (joined.includes('member name') && joined.includes('debit') && joined.includes('credit'))
+                detected = 'citi';
+            else if (joined.includes('card member') || (joined.includes('date') && joined.includes('description') && joined.includes('amount') && headers.length <= 5 && joined.includes('extended')))
+                detected = 'amex';
+            else if (joined.includes('gross') && joined.includes('fee') && joined.includes('net'))
+                detected = 'paypal';
+            else if (joined.includes('trans. date'))
+                detected = 'discover';
+
+            if (detected) {
+                document.getElementById('bankPreset').value = detected;
+                applyPreset();
+            }
+        }
+
+        window.applyPreset = function() {
+            const presetKey = document.getElementById('bankPreset').value;
+            if (!presetKey || !BANK_PRESETS[presetKey]) return;
+            const preset = BANK_PRESETS[presetKey];
+
+            function findCol(headerName) {
+                if (!headerName) return '';
+                const idx = headers.findIndex(h => h.toLowerCase().trim() === headerName.toLowerCase().trim());
+                return idx >= 0 ? String(idx) : '';
+            }
+
+            document.getElementById('mapDate').value = findCol(preset.date);
+            document.getElementById('mapDesc').value = findCol(preset.desc);
+            document.getElementById('mapAmount').value = findCol(preset.amount);
+            document.getElementById('mapDebit').value = findCol(preset.debit);
+            document.getElementById('mapCredit').value = findCol(preset.credit);
+            document.getElementById('mapCategory').value = findCol(preset.category);
+        };
+
         // CSV Parsing
         let rawRows = [];
         let headers = [];
@@ -316,6 +437,9 @@
             // Show raw preview
             const rawTable = document.getElementById('rawTable');
             const previewRows = rawRows.slice(0, 5);
+
+            // Try to auto-detect bank format from headers
+            autoDetectBank();
             rawTable.innerHTML = `
                 <thead><tr>${headers.map((h, i) => `<th title="Column ${i}">${h}</th>`).join('')}</tr></thead>
                 <tbody>${previewRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
