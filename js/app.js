@@ -95,6 +95,7 @@ const CATEGORIES = {
 };
 
 const RECURRING_TYPES = {
+    income: { icon: '💰', label: 'Income' },
     bill: { icon: '📄', label: 'Bills' },
     subscription: { icon: '📱', label: 'Subscriptions' },
     savings: { icon: '🏦', label: 'Savings' },
@@ -819,34 +820,31 @@ function detectRecurringSuggestions() {
     return suggestions;
 }
 
-window._addSuggestion = (idx) => {
+window._addSuggestion = (name) => {
     const suggestions = detectRecurringSuggestions();
-    const s = suggestions[idx];
+    const s = suggestions.find(x => x.name === name);
     if (!s) return;
     const item = {
         name: s.name, amount: s.amount, category: s.category,
-        type: s.isIncome ? 'bill' : s.type,
+        type: s.isIncome ? 'income' : s.type,
         dueDay: s.dueDay, cardId: s.cardId,
-        active: true, notes: s.isIncome ? 'Income' : '',
+        active: true, notes: '',
         createdAt: Date.now()
     };
     set(push(dbRef('recurring')), item).then(() => showToast(`Added "${s.name}" as recurring`));
 };
 
-window._dismissSuggestion = (idx) => {
-    // Store dismissed suggestions in settings so they don't reappear
+window._dismissSuggestion = (name) => {
     const dismissed = data.settings.dismissedSuggestions || [];
-    const suggestions = detectRecurringSuggestions();
-    const s = suggestions[idx];
-    if (!s) return;
-    dismissed.push(s.name.toUpperCase().trim());
+    dismissed.push(name.toUpperCase().trim());
     update(dbRef('settings'), { dismissedSuggestions: dismissed }).then(() => showToast('Suggestion dismissed'));
 };
 
-function renderSuggestionItem(s, idx) {
+function renderSuggestionItem(s) {
     const icon = s.isIncome ? '💰' : getCategoryIcon(s.category);
     const badge = s.isFixed ? '<span class="suggest-badge fixed">Fixed</span>' : '<span class="suggest-badge variable">Variable</span>';
     const typeBadge = s.isIncome ? '<span class="suggest-badge income">Income</span>' : '';
+    const safeName = escapeHtml(s.name).replace(/'/g, '&#39;');
     return `
         <div class="recurring-item suggestion-item">
             <div class="txn-icon">${icon}</div>
@@ -860,8 +858,8 @@ function renderSuggestionItem(s, idx) {
             </div>
             <div class="recurring-amount">${s.isIncome ? '+' : ''}${fmt(s.amount)}</div>
             <div class="recurring-actions" style="opacity:1">
-                <button class="btn-icon" onclick="window._addSuggestion(${idx})" title="Add as recurring" style="color:var(--primary)">✅</button>
-                <button class="btn-icon" onclick="window._dismissSuggestion(${idx})" title="Dismiss">❌</button>
+                <button class="btn-icon" onclick="window._addSuggestion('${safeName}')" title="Add as recurring" style="color:var(--primary)">✅</button>
+                <button class="btn-icon" onclick="window._dismissSuggestion('${safeName}')" title="Dismiss">❌</button>
             </div>
         </div>`;
 }
@@ -936,11 +934,11 @@ function renderRecurring() {
                 <div class="recurring-group-title">💡 Suggested Recurring (based on your transactions)</div>
                 ${incomeSuggestions.length > 0 ? `
                     <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:0.5rem">Income</div>
-                    ${incomeSuggestions.map((s, i) => renderSuggestionItem(s, allSuggestions.indexOf(s))).join('')}
+                    ${incomeSuggestions.map(s => renderSuggestionItem(s)).join('')}
                 ` : ''}
                 ${expenseSuggestions.length > 0 ? `
                     <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:0.75rem">Bills & Expenses</div>
-                    ${expenseSuggestions.map((s, i) => renderSuggestionItem(s, allSuggestions.indexOf(s))).join('')}
+                    ${expenseSuggestions.map(s => renderSuggestionItem(s)).join('')}
                 ` : ''}
             </div>` : ''}
     `;
