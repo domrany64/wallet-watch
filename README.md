@@ -6,16 +6,23 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 
 ## Features
 
-- **Budget dashboard** — See your monthly income, fixed commitments, discretionary spending, and remaining budget at a glance with a visual progress bar
-- **Transaction tracking** — Quick-add expenses with category, amount, card, spender, and description
-- **Recurring commitments** — Manage fixed monthly items: bills, subscriptions, savings, and investments (auto-deducted from budget)
-- **Multi-card support** — Track debit and credit cards, see per-card spending and credit utilization
+- **Budget dashboard** — See income, spending, remaining budget, and still-expected recurring items at a glance with a visual progress bar
+- **Smart "Still Expected"** — Recurring items matched against this month's transactions; only shows what hasn't been paid yet (e.g. "3 of 4 paid")
+- **Transaction tracking** — Quick-add expenses with category, amount, card, spender, and description; income vs expense differentiation
+- **Income & expense classification** — Transactions auto-classified as income (green +$), expense (red -$), or transfer (auto-skipped to avoid double-counting)
+- **Recurring commitments** — Manage fixed monthly items grouped by type: Income, Bills, Subscriptions, Savings, and Investments
+- **Smart suggestions** — Analyzes transaction history to detect recurring patterns (2+ months) and suggests them as recurring items with accept/dismiss
+- **Multi-account support** — Track debit, credit, savings, investment, loan, and other accounts with institution icons (Key Bank, Chase, Citi, Amex, E*Trade, Fidelity, etc.)
+- **Quick Setup** — One-click preset to add all your accounts at once (16 pre-configured institutions)
 - **Multi-spender** — Track who spends what (e.g. you and your spouse)
 - **Savings goals** — Set targets with progress tracking and monthly contributions
 - **Investment tracking** — Log stock/investment holdings with cost basis and current value
-- **Per-category breakdown** — See spending distribution across categories (groceries, dining, transport, etc.)
+- **Per-category breakdown** — See spending distribution across 19 categories (groceries, dining, transport, etc.)
+- **Per-spender breakdown** — See who's spending what on the dashboard
 - **Month navigation** — Browse current and past months with full history
-- **Encrypted backups** — In-app backup/restore with AES-256 password encryption (your data stays private)
+- **Bank CSV import** — Bulk import transactions from bank statement CSVs with auto-detection for Chase, Citi, Amex, Gap, Nordstrom, Key Bank, US Bank, OnPoint, PayPal, and more
+- **Smart transfer filtering** — Auto-skips credit card payments and inter-account transfers during import to avoid double-counting
+- **Encrypted backups** — In-app backup/restore with AES-256-GCM password encryption (your data stays private)
 - **Secure by design** — Firebase Auth + per-user database rules; no one sees your data without your login
 - **Responsive** — Works on desktop, tablet, and mobile
 
@@ -67,7 +74,17 @@ Apply these rules in your Firebase Console → Realtime Database → Rules:
 ## Tools
 
 - **Helpers page:** [/helpers/](https://domrany64.github.io/wallet-watch/helpers/) — Index of all helper tools
-- **Import Bank CSV:** [/import-csv.html](https://domrany64.github.io/wallet-watch/import-csv.html) — Bulk import transactions from any bank statement CSV
+- **Import Bank CSV:** [/import-csv.html](https://domrany64.github.io/wallet-watch/import-csv.html) — Bulk import transactions from any bank statement CSV with auto-detection for:
+  - 🏛️ Chase (credit card)
+  - 🌐 Citi (credit card)
+  - 💎 Amex (American Express)
+  - 👔 Gap (Barclays)
+  - 🛍️ Nordstrom
+  - 🔑 Key Bank
+  - 🏦 US Bank
+  - 📍 OnPoint
+  - 🅿️ PayPal
+  - Plus Bank of America, Capital One, Wells Fargo, Discover
 
 ## License
 

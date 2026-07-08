@@ -39,11 +39,12 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
       spenders: ["Damon", "Sedi"]
     /cards
       /<pushId>
-        name: "Chase Checking Debit"
-        type: "debit" | "credit"
+        name: "Chase Credit Card"
+        institution: "chase"    // key from INSTITUTIONS constant
+        type: "debit" | "credit" | "savings" | "investment" | "loan" | "other"
         holder: "Damon"
         lastFour: "4521"
-        creditLimit: 5000       // null for debit
+        creditLimit: 5000       // null for non-credit
         active: true
         createdAt: 1720000000000
     /recurring
@@ -51,9 +52,9 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
         name: "Rent"
         amount: 2000
         category: "housing"
-        type: "bill" | "subscription" | "savings" | "investment"
+        type: "income" | "bill" | "subscription" | "savings" | "investment"
         dueDay: 1
-        cardId: ""              // optional link to a card
+        cardId: ""              // optional link to an account
         active: true
         notes: ""
         createdAt: 1720000000000
@@ -62,6 +63,7 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
         amount: 54.32
         category: "groceries"
         description: "Costco"
+        txnType: "expense" | "income"  // auto-classified during import
         cardId: "abc123"
         spender: "Damon"
         date: "2026-07-06"
@@ -110,14 +112,25 @@ Each user's data is completely isolated. No public read access.
 ## Budget Calculation
 
 ```
-Monthly Income
-  − Sum of active recurring items (bills + subscriptions + savings + investments)
-  = Discretionary Budget
-  − Sum of transactions for the current month
+Monthly Income (from settings)
+  − Sum of expense transactions for the current month
   = Remaining Budget
 ```
 
-Recurring items are treated as **committed money** — they're always deducted from income regardless of whether a matching transaction exists. Transactions represent **actual variable spending**.
+Transactions are the **source of truth** for spending. Recurring items are informational — they show what to expect each month but are not deducted separately (to avoid double-counting when a recurring payment also appears as a transaction).
+
+The dashboard "Still Expected" card intelligently matches recurring items against this month's transactions:
+- If a transaction matches by description keywords + similar amount (±20%) → marked as paid
+- If the recurring item's due day has passed → fallback: marked as paid
+- Only unpaid recurring items count toward "Still Expected"
+
+### Transaction Classification (during CSV import)
+
+| Type | Description | Example |
+|------|-------------|--------|
+| `expense` | Money going out (purchases, bills) | Costco $50, Ziply $75 |
+| `income` | Money coming in (paychecks, refunds) | Paycheck $3,690 |
+| `transfer` | Money between own accounts (auto-skipped) | Citi Card Payment $1,356 |
 
 ---
 
@@ -137,34 +150,39 @@ Recurring items are treated as **committed money** — they're always deducted f
 
 ### Header
 - App logo "💰 WalletWatch"
-- Navigation tabs: Dashboard, Transactions, Recurring, Cards, Savings
+- Navigation tabs: Dashboard, Transactions, Recurring, Accounts, Savings
+- Settings (⚙️) and Backup (🔒) buttons
 - Login/Logout button
 
 ### Dashboard
 - Month navigator (← prev / next →)
-- Budget summary cards: Income, Committed, Discretionary, Spent, Remaining
-- Visual budget progress bar (green → yellow → red as spending increases)
-- Per-spender breakdown
-- Per-category spending chart (horizontal bars)
-- Recent transactions (last 10)
+- Budget summary cards: Income, Spent, Remaining, Still Expected (with "X of Y paid")
+- Visual budget progress bar: spent as % of income (green → yellow → red)
+- Per-category spending chart (horizontal bars, expenses only)
+- Per-spender breakdown (expenses only)
+- Recent transactions (last 10, income shown with green badge)
 
 ### Transactions View
 - Month selector
 - Quick-add form (inline, always visible)
 - Filter bar: by card, spender, category
 - Transaction list sorted by date (newest first)
-- Monthly total
+- Income transactions shown with green +$ and INCOME badge
+- Separate totals: Spent (red) and Income (green)
 
 ### Recurring View
-- Grouped by type: Bills, Subscriptions, Savings, Investments
-- Each item shows: name, amount, category, due day, linked card
+- Grouped by type: Income, Bills, Subscriptions, Savings, Investments
+- Each item shows: name, amount, category, due day, linked account
 - Toggle active/inactive
-- Total monthly commitments
+- Separate totals for monthly expenses and monthly income
+- **Smart suggestions** section: auto-detected recurring patterns from transaction history with Fixed/Variable badges, accept (✅) or dismiss (❌)
 
-### Cards View
-- Card grid showing each card
-- Per-card: name, type badge (debit/credit), holder, last 4, this month's spending
+### Accounts View (was "Cards")
+- Grouped by account type: Debit/Checking, Credit Card, Savings, Investment, Loan/Mortgage, Other
+- Each account shows: institution icon, name, type badge, holder, last 4, monthly spending
 - Credit cards: utilization bar (spending vs. limit)
+- Quick Setup button to add all 16 preset accounts at once
+- Supported institutions: Key Bank, US Bank, OnPoint, Upgrade, Chase, Citi, Amex, Gap, Nordstrom, E*Trade, Fidelity, Embark Oregon, Intel, PayPal, Mr. Cooper, Nelnet
 
 ### Savings View
 - Savings goals with progress bars (current/target)
@@ -216,7 +234,7 @@ Previous apps backed up plain JSON to a public GitHub repo — anyone could see 
    - Commits encrypted `.enc` file to `backups/` folder
    - Even if repo is public, data is unreadable without the password
 
-3. **Recommended:** Keep the GitHub repository **private**
+3. **Public repo is safe** — Firebase API key is a project identifier, not a secret. Security comes from database rules + auth. Backup files are encrypted.
 
 ---
 
