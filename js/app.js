@@ -386,10 +386,66 @@ function renderWelcome() {
         </div>`;
 }
 
+// ===== Recurring Status Helpers =====
+function getRecurringStatus() {
+    const recurringItems = Object.values(data.recurring).filter(r => r.active !== false && r.type !== 'income');
+    const monthTxns = getMonthTransactions().filter(t => t.txnType !== 'income');
+    const isCurrentMonth = selectedMonth === getCurrentMonth();
+    const today = isCurrentMonth ? dayOfMonth() : daysInMonth(selectedMonth);
+
+    let paidCount = 0;
+    let paidTotal = 0;
+    let unpaidTotal = 0;
+
+    recurringItems.forEach(r => {
+        let isPaid = false;
+        const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
+        const rAmount = Number(r.amount || 0);
+
+        // Try matching against transactions by description keywords + similar amount
+        for (const t of monthTxns) {
+            const tDesc = (t.description || '').toUpperCase();
+            const tAmount = Number(t.amount || 0);
+
+            // Amount within 20% tolerance
+            const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
+
+            // Description match: check if key words from recurring name appear in transaction
+            const rWords = rName.split(/\s+/).filter(w => w.length > 2);
+            const descMatch = rWords.some(w => tDesc.includes(w));
+
+            if (amountClose && descMatch) {
+                isPaid = true;
+                break;
+            }
+        }
+
+        // Fallback: if due day is set and has passed
+        if (!isPaid && r.dueDay && r.dueDay <= today) {
+            isPaid = true;
+        }
+
+        if (isPaid) {
+            paidCount++;
+            paidTotal += rAmount;
+        } else {
+            unpaidTotal += rAmount;
+        }
+    });
+
+    return {
+        total: recurringItems.length,
+        paidCount,
+        paidTotal,
+        unpaidCount: recurringItems.length - paidCount,
+        unpaidTotal
+    };
+}
+
 // ===== RENDER: Dashboard =====
 function renderDashboard() {
     const income = Number(data.settings.monthlyIncome || 0);
-    const committed = getActiveRecurringTotal();
+    const recurStatus = getRecurringStatus();
     const spent = getMonthSpending();
     const remaining = income - spent;
     const txns = getMonthTransactions().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -456,9 +512,9 @@ function renderDashboard() {
                 <div class="sub">${isCurrentMonth ? `Day ${currentDay} of ${totalDays}` : 'Past month'}</div>
             </div>
             <div class="summary-card">
-                <div class="label">Expected</div>
-                <div class="value warning">${fmt(committed)}</div>
-                <div class="sub">${Object.values(data.recurring).filter(r => r.active !== false).length} recurring items</div>
+                <div class="label">Still Expected</div>
+                <div class="value ${recurStatus.unpaidTotal > 0 ? 'warning' : 'positive'}">${fmt(recurStatus.unpaidTotal)}</div>
+                <div class="sub">${recurStatus.paidCount} of ${recurStatus.total} paid</div>
             </div>
         </div>
 
