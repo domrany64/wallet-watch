@@ -127,7 +127,7 @@ The dashboard "Still Expected" card intelligently matches recurring items agains
 | **Current month** | Paid ✓ | Late ⚠️ | Expected |
 | **Past month** | Paid ✓ | Late ⚠️ | Late ⚠️ |
 
-Transaction matching: description keywords + similar amount (±20%). Subtitle shows e.g. "2 of 3 paid • 1 late".
+Transaction matching: description keywords + similar amount (±20%). Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card expands a detail panel listing each recurring item with its status (✅ Paid, ⚠️ Late, ⏳ Expected), amount, due day, and linked account.
 
 ### Transaction Classification (during CSV import)
 

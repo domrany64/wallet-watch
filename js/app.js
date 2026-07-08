@@ -375,6 +375,10 @@ function monthNavHtml() {
 
 window._prevMonth = () => { selectedMonth = prevMonth(selectedMonth); handleRoute(); };
 window._nextMonth = () => { selectedMonth = nextMonth(selectedMonth); handleRoute(); };
+window._toggleRecurringDetail = () => {
+    const el = document.getElementById('recurringDetail');
+    if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+};
 
 // ===== RENDER: Welcome =====
 function renderWelcome() {
@@ -400,12 +404,12 @@ function getRecurringStatus() {
     let lateCount = 0;
     let lateTotal = 0;
     let unpaidTotal = 0;
+    const items = []; // per-item detail
 
     recurringItems.forEach(r => {
         const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
         const rAmount = Number(r.amount || 0);
 
-        // Try matching against actual transactions
         let foundInTxns = false;
         for (const t of monthTxns) {
             const tDesc = (t.description || '').toUpperCase();
@@ -419,38 +423,39 @@ function getRecurringStatus() {
             }
         }
 
+        let status;
         if (foundInTxns) {
-            // Found a matching transaction → paid
+            status = 'paid';
             paidCount++;
             paidTotal += rAmount;
         } else if (isFutureMonth) {
-            // Future month → everything is expected
+            status = 'expected';
             unpaidTotal += rAmount;
         } else if (isPastMonth) {
-            // Past month, no matching transaction → late/missed
+            status = 'late';
             lateCount++;
             lateTotal += rAmount;
         } else {
-            // Current month, not found in transactions
             if (r.dueDay && r.dueDay <= today) {
-                // Due day passed but no transaction → late
+                status = 'late';
                 lateCount++;
                 lateTotal += rAmount;
             } else {
-                // Due day hasn't come yet (or no due day set) → still expected
+                status = 'expected';
                 unpaidTotal += rAmount;
             }
         }
+
+        items.push({ name: r.name, amount: rAmount, status, dueDay: r.dueDay, cardId: r.cardId });
     });
 
     return {
         total: recurringItems.length,
-        paidCount,
-        paidTotal,
-        lateCount,
-        lateTotal,
+        paidCount, paidTotal,
+        lateCount, lateTotal,
         unpaidCount: recurringItems.length - paidCount - lateCount,
-        unpaidTotal
+        unpaidTotal,
+        items
     };
 }
 
@@ -523,10 +528,33 @@ function renderDashboard() {
                 <div class="value ${overBudget ? 'negative' : 'positive'}">${fmt(remaining)}</div>
                 <div class="sub">${isCurrentMonth ? `Day ${currentDay} of ${totalDays}` : 'Past month'}</div>
             </div>
-            <div class="summary-card">
+            <div class="summary-card clickable" onclick="window._toggleRecurringDetail()">
                 <div class="label">Still Expected</div>
                 <div class="value ${recurStatus.unpaidTotal > 0 ? 'warning' : 'positive'}">${fmt(recurStatus.unpaidTotal)}</div>
-                <div class="sub">${recurStatus.paidCount} of ${recurStatus.total} paid${recurStatus.lateCount > 0 ? ` • <span style="color:var(--danger)">${recurStatus.lateCount} late</span>` : ''}</div>
+                <div class="sub">${recurStatus.paidCount} of ${recurStatus.total} paid${recurStatus.lateCount > 0 ? ` • <span style="color:var(--danger)">${recurStatus.lateCount} late</span>` : ''} • <span style="color:var(--primary)">click for details</span></div>
+            </div>
+        </div>
+
+        <div class="recurring-detail" id="recurringDetail" style="display:none">
+            <div class="card" style="margin-bottom:1.5rem">
+                <div class="card-header">
+                    <span class="card-title">Recurring Status — ${monthLabel(selectedMonth)}</span>
+                    <button class="btn-icon" onclick="window._toggleRecurringDetail()">✕</button>
+                </div>
+                ${recurStatus.items.map(item => {
+                    const statusIcon = item.status === 'paid' ? '✅' : item.status === 'late' ? '⚠️' : '⏳';
+                    const statusLabel = item.status === 'paid' ? 'Paid' : item.status === 'late' ? 'Late' : 'Expected';
+                    const statusColor = item.status === 'paid' ? 'var(--primary)' : item.status === 'late' ? 'var(--danger)' : 'var(--warning)';
+                    return `
+                    <div class="recurring-detail-row">
+                        <span class="recurring-detail-icon">${statusIcon}</span>
+                        <span class="recurring-detail-name">${escapeHtml(item.name)}</span>
+                        ${item.dueDay ? `<span class="recurring-detail-meta">Day ${item.dueDay}</span>` : ''}
+                        ${item.cardId ? `<span class="recurring-detail-meta">${getCardName(item.cardId)}</span>` : ''}
+                        <span class="recurring-detail-amount">${fmt(item.amount)}</span>
+                        <span class="recurring-detail-status" style="color:${statusColor}">${statusLabel}</span>
+                    </div>`;
+                }).join('')}
             </div>
         </div>
 

@@ -253,6 +253,62 @@ body {
     opacity: 0.5;
 }
 
+/* ===== Clickable Card & Recurring Detail ===== */
+.summary-card.clickable {
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.summary-card.clickable:hover {
+    border-color: var(--primary);
+    background: var(--surface-hover);
+}
+
+.recurring-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+}
+
+.recurring-detail-row:last-child {
+    border-bottom: none;
+}
+
+.recurring-detail-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.recurring-detail-name {
+    flex: 1;
+    font-weight: 500;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recurring-detail-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.recurring-detail-amount {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.recurring-detail-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 55px;
+    text-align: right;
+}
+
 /* ===== Month Navigator ===== */
 .month-nav {
     display: flex;
