@@ -592,8 +592,11 @@
                         // Debit column has a value — treat as expense
                         amount = Math.abs(debit);
                     } else if (!isNaN(credit) && credit !== 0) {
-                        // Credit column has a value — payment/refund (skip by default)
-                        if (skipPositive) { skipped++; continue; }
+                        // Credit column — check if it's a payment (skip) or a refund (keep)
+                        const desc = (row[descCol] || '').toLowerCase();
+                        const isPayment = /payment|thank you|autopay|auto pay|pymt/.test(desc);
+                        if (isPayment) { skipped++; continue; }
+                        // Actual refund — keep it
                         amount = Math.abs(credit);
                     } else {
                         skipped++;
@@ -604,15 +607,20 @@
                     amount = parseFloat((row[amountCol] || '').replace(/[$,]/g, ''));
                     if (isNaN(amount) || amount === 0) { skipped++; continue; }
 
+                    const desc = (row[descCol] || '').toLowerCase();
+                    const isPayment = /payment|thank you|autopay|auto pay|pymt/.test(desc);
+
                     if (negIsExpense) {
                         // Negative = expense (Chase, Key Bank, US Bank, PayPal, etc.)
                         if (amount > 0) {
+                            if (isPayment) { skipped++; continue; }
                             if (skipPositive) { skipped++; continue; }
                         }
                         amount = Math.abs(amount);
                     } else {
                         // Positive = expense (Amex, Gap)
                         if (amount < 0) {
+                            if (isPayment) { skipped++; continue; }
                             if (skipPositive) { skipped++; continue; }
                             amount = Math.abs(amount);
                         }
