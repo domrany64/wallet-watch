@@ -370,11 +370,13 @@ function monthNavHtml() {
             <button onclick="window._prevMonth()">◀</button>
             <span class="month-label">${monthLabel(selectedMonth)}</span>
             <button onclick="window._nextMonth()">▶</button>
+            ${selectedMonth !== getCurrentMonth() ? `<button class="btn btn-sm btn-surface" onclick="window._goToday()" style="margin-left:0.5rem">Today</button>` : ''}
         </div>`;
 }
 
 window._prevMonth = () => { selectedMonth = prevMonth(selectedMonth); handleRoute(); };
 window._nextMonth = () => { selectedMonth = nextMonth(selectedMonth); handleRoute(); };
+window._goToday = () => { selectedMonth = getCurrentMonth(); handleRoute(); };
 window._toggleRecurringDetail = () => {
     const el = document.getElementById('recurringDetail');
     if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
@@ -1789,4 +1791,9 @@ document.getElementById('loginClose').addEventListener('click', () => hideOverla
 document.getElementById('modalClose').addEventListener('click', hideModal);
 
 // ===== Init =====
+// Show today's date in header
+const headerDateEl = document.getElementById('headerDate');
+if (headerDateEl) {
+    headerDateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+}
 handleRoute();

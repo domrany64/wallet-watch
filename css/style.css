@@ -53,6 +53,12 @@ body {
     justify-content: space-between;
 }
 
+.header-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-left: 1rem;
+}
+
 .header-actions {
     display: flex;
     align-items: center;

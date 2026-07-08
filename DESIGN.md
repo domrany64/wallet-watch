@@ -154,13 +154,13 @@ Transaction matching: description keywords + similar amount (±20%). Subtitle sh
 ## UI Layout
 
 ### Header
-- App logo "💰 WalletWatch"
+- App logo "💰 WalletWatch" with today's date (e.g. "Tue, Jul 8, 2026") displayed in small text
 - Navigation tabs: Dashboard, Transactions, Recurring, Accounts, Savings
 - Settings (⚙️) and Backup (🔒) buttons
 - Login/Logout button
 
 ### Dashboard
-- Month navigator (← prev / next →)
+- Month navigator (← prev / next →) with "Today" button when viewing a non-current month
 - Budget summary cards: Income, Spent, Remaining, Still Expected (with "X of Y paid")
 - Visual budget progress bar: spent as % of income (green → yellow → red)
 - Per-category spending chart (horizontal bars, expenses only)
