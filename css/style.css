@@ -510,6 +510,37 @@ body {
     opacity: 1;
 }
 
+/* ===== Suggestion Items ===== */
+.suggestion-item {
+    border-left: 3px solid var(--warning);
+    background: rgba(245, 158, 11, 0.04);
+}
+
+.suggest-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+    margin-left: 0.25rem;
+}
+
+.suggest-badge.fixed {
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+.suggest-badge.variable {
+    background: var(--warning-muted);
+    color: var(--warning);
+}
+
+.suggest-badge.income {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--primary);
+}
+
 /* ===== Card Items ===== */
 .cards-grid {
     display: grid;

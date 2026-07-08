@@ -746,6 +746,126 @@ window._deleteTxn = (id) => {
 
 window._hideModal = hideModal;
 
+// ===== Smart Suggestions Engine =====
+function detectRecurringSuggestions() {
+    const allTxns = Object.values(data.transactions);
+    if (allTxns.length < 3) return [];
+
+    // Group transactions by normalized description
+    const groups = {};
+    allTxns.forEach(t => {
+        let key = (t.description || '').toUpperCase()
+            .replace(/\s+/g, ' ')
+            .replace(/#\d+/g, '')
+            .replace(/\s+(OR|WA|CA|TX|NY|FL|AZ|CO)\s*$/i, '')
+            .replace(/\s+\d{5,}$/, '')
+            .trim();
+        if (!key || key.length < 3) return;
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(t);
+    });
+
+    const suggestions = [];
+    const existingNames = new Set(
+        Object.values(data.recurring).map(r => (r.name || '').toUpperCase().trim())
+    );
+
+    for (const [key, txns] of Object.entries(groups)) {
+        if (txns.length < 2) continue;
+        const months = new Set(txns.map(t => t.month));
+        if (months.size < 2) continue;
+
+        const amounts = txns.map(t => Number(t.amount || 0));
+        const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+        const maxDiff = Math.max(...amounts.map(a => Math.abs(a - avgAmount)));
+        const isFixed = maxDiff < avgAmount * 0.15;
+        if (avgAmount < 1) continue;
+        if (existingNames.has(key)) continue;
+
+        const isIncome = txns[0].txnType === 'income';
+        const category = txns[0].category || 'other';
+
+        const cardCounts = {};
+        const spenderCounts = {};
+        txns.forEach(t => {
+            if (t.cardId) cardCounts[t.cardId] = (cardCounts[t.cardId] || 0) + 1;
+            if (t.spender) spenderCounts[t.spender] = (spenderCounts[t.spender] || 0) + 1;
+        });
+        const topCard = Object.entries(cardCounts).sort((a, b) => b[1] - a[1])[0];
+        const topSpender = Object.entries(spenderCounts).sort((a, b) => b[1] - a[1])[0];
+
+        const days = txns.map(t => t.date ? parseInt(t.date.split('-')[2]) : null).filter(Boolean);
+        const avgDay = days.length > 0 ? Math.round(days.reduce((a, b) => a + b, 0) / days.length) : null;
+
+        let recurType = 'bill';
+        if (/subscri|netflix|hulu|spotify|disney|youtube|amazon prime|apple\s/i.test(key)) recurType = 'subscription';
+        else if (/savings|transfer|upgrade|401|ira|invest/i.test(key)) recurType = 'savings';
+
+        suggestions.push({
+            name: txns[0].description || key,
+            amount: Math.round(avgAmount * 100) / 100,
+            category, type: recurType, isIncome, isFixed,
+            months: months.size, occurrences: txns.length,
+            cardId: topCard ? topCard[0] : '',
+            spender: topSpender ? topSpender[0] : '',
+            dueDay: avgDay
+        });
+    }
+
+    suggestions.sort((a, b) => {
+        if (a.isFixed !== b.isFixed) return a.isFixed ? -1 : 1;
+        return b.occurrences - a.occurrences;
+    });
+    return suggestions;
+}
+
+window._addSuggestion = (idx) => {
+    const suggestions = detectRecurringSuggestions();
+    const s = suggestions[idx];
+    if (!s) return;
+    const item = {
+        name: s.name, amount: s.amount, category: s.category,
+        type: s.isIncome ? 'bill' : s.type,
+        dueDay: s.dueDay, cardId: s.cardId,
+        active: true, notes: s.isIncome ? 'Income' : '',
+        createdAt: Date.now()
+    };
+    set(push(dbRef('recurring')), item).then(() => showToast(`Added "${s.name}" as recurring`));
+};
+
+window._dismissSuggestion = (idx) => {
+    // Store dismissed suggestions in settings so they don't reappear
+    const dismissed = data.settings.dismissedSuggestions || [];
+    const suggestions = detectRecurringSuggestions();
+    const s = suggestions[idx];
+    if (!s) return;
+    dismissed.push(s.name.toUpperCase().trim());
+    update(dbRef('settings'), { dismissedSuggestions: dismissed }).then(() => showToast('Suggestion dismissed'));
+};
+
+function renderSuggestionItem(s, idx) {
+    const icon = s.isIncome ? '💰' : getCategoryIcon(s.category);
+    const badge = s.isFixed ? '<span class="suggest-badge fixed">Fixed</span>' : '<span class="suggest-badge variable">Variable</span>';
+    const typeBadge = s.isIncome ? '<span class="suggest-badge income">Income</span>' : '';
+    return `
+        <div class="recurring-item suggestion-item">
+            <div class="txn-icon">${icon}</div>
+            <div class="recurring-info">
+                <div class="recurring-name">${escapeHtml(s.name)} ${badge} ${typeBadge}</div>
+                <div class="recurring-meta">
+                    ${s.months} months • ${s.occurrences} times
+                    ${s.dueDay ? ` • ~Day ${s.dueDay}` : ''}
+                    ${s.cardId ? ` • ${getCardName(s.cardId)}` : ''}
+                </div>
+            </div>
+            <div class="recurring-amount">${s.isIncome ? '+' : ''}${fmt(s.amount)}</div>
+            <div class="recurring-actions" style="opacity:1">
+                <button class="btn-icon" onclick="window._addSuggestion(${idx})" title="Add as recurring" style="color:var(--primary)">✅</button>
+                <button class="btn-icon" onclick="window._dismissSuggestion(${idx})" title="Dismiss">❌</button>
+            </div>
+        </div>`;
+}
+
 // ===== RENDER: Recurring =====
 function renderRecurring() {
     const items = Object.entries(data.recurring).map(([id, r]) => ({ id, ...r }));
@@ -758,6 +878,12 @@ function renderRecurring() {
     });
 
     const totalActive = items.filter(r => r.active !== false).reduce((s, r) => s + Number(r.amount || 0), 0);
+
+    // Generate suggestions (filter out dismissed ones)
+    const dismissed = new Set((data.settings.dismissedSuggestions || []).map(s => s.toUpperCase()));
+    const allSuggestions = detectRecurringSuggestions().filter(s => !dismissed.has(s.name.toUpperCase().trim()));
+    const expenseSuggestions = allSuggestions.filter(s => !s.isIncome);
+    const incomeSuggestions = allSuggestions.filter(s => s.isIncome);
 
     mainContent.innerHTML = `
         <div class="section-header">
@@ -802,7 +928,20 @@ function renderRecurring() {
             <div class="empty-state">
                 <div class="emoji">🔄</div>
                 <h2>No recurring items yet</h2>
-                <p>Add your monthly bills, subscriptions, savings plans, and investments.</p>
+                <p>Add your monthly bills, subscriptions, savings plans, and investments. Or check the suggestions below!</p>
+            </div>` : ''}
+
+        ${allSuggestions.length > 0 ? `
+            <div class="recurring-group" style="margin-top: 2rem">
+                <div class="recurring-group-title">💡 Suggested Recurring (based on your transactions)</div>
+                ${incomeSuggestions.length > 0 ? `
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:0.5rem">Income</div>
+                    ${incomeSuggestions.map((s, i) => renderSuggestionItem(s, allSuggestions.indexOf(s))).join('')}
+                ` : ''}
+                ${expenseSuggestions.length > 0 ? `
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:0.75rem">Bills & Expenses</div>
+                    ${expenseSuggestions.map((s, i) => renderSuggestionItem(s, allSuggestions.indexOf(s))).join('')}
+                ` : ''}
             </div>` : ''}
     `;
 }
