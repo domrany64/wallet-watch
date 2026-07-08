@@ -300,7 +300,7 @@ function getMonthTransactions() {
 
 function getActiveRecurringTotal() {
     return Object.values(data.recurring)
-        .filter(r => r.active !== false)
+        .filter(r => r.active !== false && r.type !== 'income')
         .reduce((sum, r) => sum + Number(r.amount || 0), 0);
 }
 
@@ -546,7 +546,8 @@ function renderTransactions() {
         if (a.date !== b.date) return (b.date || '').localeCompare(a.date || '');
         return (b.createdAt || 0) - (a.createdAt || 0);
     });
-    const total = txns.reduce((s, t) => s + Number(t.amount || 0), 0);
+    const expenseTotal = txns.filter(t => t.txnType !== 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+    const incomeTotal = txns.filter(t => t.txnType === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
     const today = new Date().toISOString().split('T')[0];
 
     mainContent.innerHTML = `
@@ -615,9 +616,13 @@ function renderTransactions() {
 
         ${txns.length > 0 ? `
         <div class="totals-bar">
-            <span class="total-label">Total for ${monthLabel(selectedMonth)}</span>
-            <span class="total-value">${fmt(total)}</span>
-        </div>` : ''}
+            <span class="total-label">Spent in ${monthLabel(selectedMonth)}</span>
+            <span class="total-value" style="color:var(--danger)">-${fmt(expenseTotal)}</span>
+        </div>
+        ${incomeTotal > 0 ? `<div class="totals-bar" style="margin-top:0.5rem">
+            <span class="total-label">Income in ${monthLabel(selectedMonth)}</span>
+            <span class="total-value" style="color:var(--primary)">+${fmt(incomeTotal)}</span>
+        </div>` : ''}` : ''}
     `;
 
     document.getElementById('quickAddForm').addEventListener('submit', handleQuickAdd);
@@ -874,7 +879,8 @@ function renderRecurring() {
         grouped[type].push(r);
     });
 
-    const totalActive = items.filter(r => r.active !== false).reduce((s, r) => s + Number(r.amount || 0), 0);
+    const totalExpenses = items.filter(r => r.active !== false && r.type !== 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
+    const totalIncome = items.filter(r => r.active !== false && r.type === 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
 
     // Generate suggestions (filter out dismissed ones)
     const dismissed = new Set((data.settings.dismissedSuggestions || []).map(s => s.toUpperCase()));
@@ -889,9 +895,13 @@ function renderRecurring() {
         </div>
 
         <div class="totals-bar" style="margin-bottom: 1.5rem">
-            <span class="total-label">Total Monthly Commitments</span>
-            <span class="total-value">${fmt(totalActive)}</span>
+            <span class="total-label">Monthly Expenses</span>
+            <span class="total-value" style="color:var(--danger)">-${fmt(totalExpenses)}</span>
         </div>
+        ${totalIncome > 0 ? `<div class="totals-bar" style="margin-bottom: 1.5rem;margin-top:-0.75rem">
+            <span class="total-label">Monthly Income</span>
+            <span class="total-value" style="color:var(--primary)">+${fmt(totalIncome)}</span>
+        </div>` : ''}
 
         ${Object.entries(RECURRING_TYPES).map(([type, cfg]) => {
             const group = grouped[type] || [];
