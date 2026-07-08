@@ -119,10 +119,15 @@ Monthly Income (from settings)
 
 Transactions are the **source of truth** for spending. Recurring items are informational — they show what to expect each month but are not deducted separately (to avoid double-counting when a recurring payment also appears as a transaction).
 
-The dashboard "Still Expected" card intelligently matches recurring items against this month's transactions:
-- If a transaction matches by description keywords + similar amount (±20%) → marked as paid
-- If the recurring item's due day has passed → fallback: marked as paid
-- Only unpaid recurring items count toward "Still Expected"
+The dashboard "Still Expected" card intelligently matches recurring items against the selected month's transactions. The logic is time-aware:
+
+| Viewing | Transaction found | No transaction, due day passed | No transaction, due day upcoming |
+|---------|-------------------|-------------------------------|----------------------------------|
+| **Future month** | Paid ✓ | Expected | Expected |
+| **Current month** | Paid ✓ | Late ⚠️ | Expected |
+| **Past month** | Paid ✓ | Late ⚠️ | Late ⚠️ |
+
+Transaction matching: description keywords + similar amount (±20%). Subtitle shows e.g. "2 of 3 paid • 1 late".
 
 ### Transaction Classification (during CSV import)
 
