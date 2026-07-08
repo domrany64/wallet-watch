@@ -398,7 +398,6 @@ function renderDashboard() {
     const pct = income > 0 ? Math.min((spent / income) * 100, 100) : 0;
     const barClass = pct < 60 ? 'safe' : pct < 85 ? 'caution' : 'over';
     const overBudget = remaining < 0;
-    const overBudget = remaining < 0;
 
     // If no settings, show setup prompt
     if (!income) {
