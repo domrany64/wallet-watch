@@ -354,6 +354,8 @@ body {
     background: var(--primary);
     border: none;
     color: white;
+    width: auto;
+    height: auto;
     padding: 0.35rem 0.9rem;
     border-radius: 6px;
     cursor: pointer;

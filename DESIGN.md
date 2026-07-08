@@ -127,7 +127,13 @@ The dashboard "Still Expected" card intelligently matches recurring items agains
 | **Current month** | Paid ✓ | Late ⚠️ | Expected |
 | **Past month** | Paid ✓ | Late ⚠️ | Late ⚠️ |
 
-Transaction matching: description keywords + similar amount (±20%). Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card expands a detail panel listing each recurring item with its status (✅ Paid, ⚠️ Late, ⏳ Expected), amount, due day, and linked account.
+Transaction matching uses two strategies:
+1. Close amount (±20%) + description keyword match
+2. Exact amount match for non-round numbers (handles renamed bills, e.g. mortgage servicer changes)
+
+Round numbers ($50, $100, $500, etc.) require description match to avoid false positives.
+
+Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card expands a detail panel listing each recurring item with its status (✅ Paid, ⚠️ Late, ⏳ Expected), amount, due day, and linked account.
 
 ### Transaction Classification (during CSV import)
 
