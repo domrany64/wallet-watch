@@ -97,15 +97,17 @@
                     <select id="bankPreset" onchange="applyPreset()">
                         <option value="">— Manual mapping —</option>
                         <option value="chase_credit">Chase Credit Card</option>
-                        <option value="chase_debit">Chase Checking/Debit</option>
                         <option value="citi">Citi Credit Card</option>
                         <option value="amex">Amex (American Express)</option>
+                        <option value="gap">Gap (Barclays)</option>
+                        <option value="nordstrom">Nordstrom</option>
                         <option value="keybank">Key Bank</option>
                         <option value="usbank">US Bank</option>
+                        <option value="onpoint">OnPoint</option>
+                        <option value="paypal">PayPal</option>
                         <option value="bofa">Bank of America</option>
                         <option value="capitalone">Capital One</option>
                         <option value="wellsfargo">Wells Fargo</option>
-                        <option value="paypal">PayPal</option>
                         <option value="discover">Discover</option>
                     </select>
                 </div>
@@ -211,9 +213,12 @@
         const CATEGORY_MAP = {
             'food & drink': 'dining', 'food': 'dining', 'restaurants': 'dining', 'dining': 'dining',
             'groceries': 'groceries', 'grocery': 'groceries', 'supermarket': 'groceries',
-            'gas': 'transport', 'fuel': 'transport', 'transportation': 'transport', 'travel': 'travel',
-            'automotive': 'transport', 'car': 'transport', 'parking': 'transport', 'uber': 'transport', 'lyft': 'transport',
+            'coffee shops': 'dining', 'coffee': 'dining',
+            'gas': 'transport', 'fuel': 'transport', 'transportation': 'transport',
+            'automotive': 'transport', 'car': 'transport', 'parking': 'transport',
+            'uber': 'transport', 'lyft': 'transport',
             'shopping': 'shopping', 'merchandise': 'shopping', 'retail': 'shopping',
+            'retail purchases': 'shopping',
             'entertainment': 'entertainment', 'recreation': 'entertainment', 'movies': 'entertainment',
             'health': 'healthcare', 'healthcare': 'healthcare', 'medical': 'healthcare', 'pharmacy': 'healthcare',
             'bills & utilities': 'utilities', 'utilities': 'utilities', 'electric': 'utilities', 'water': 'utilities',
@@ -223,9 +228,11 @@
             'personal care': 'personal', 'personal': 'personal',
             'gifts & donations': 'gifts', 'gifts': 'gifts', 'charity': 'gifts',
             'home': 'housing', 'rent': 'housing', 'mortgage': 'housing',
+            'hotel/lodging': 'travel', 'travel': 'travel', 'airlines': 'travel',
             'pets': 'pets', 'pet': 'pets',
             'kids': 'childcare', 'childcare': 'childcare',
             'subscriptions': 'subscriptions', 'subscription': 'subscriptions',
+            'other purchases and cash': 'other', 'other': 'other',
         };
 
         const CATEGORIES = {
@@ -241,7 +248,6 @@
             if (!bankCat) return null;
             const lower = bankCat.toLowerCase().trim();
             if (CATEGORY_MAP[lower]) return CATEGORY_MAP[lower];
-            // Partial match
             for (const [key, val] of Object.entries(CATEGORY_MAP)) {
                 if (lower.includes(key) || key.includes(lower)) return val;
             }
@@ -254,7 +260,6 @@
             const loginBar = document.getElementById('loginBar');
             if (user) {
                 loginBar.style.display = 'none';
-                // Load user data for cards/spenders
                 const snap = await get(ref(db, `households/${user.uid}`));
                 userData = snap.val() || {};
                 populateAssignFields();
@@ -294,58 +299,62 @@
         }
 
         // ===== Bank Format Presets =====
-        // Maps: { date: header, desc: header, amount: header, debit: header, credit: header, category: header }
+        // Based on actual CSV exports from each bank
         const BANK_PRESETS = {
             chase_credit: {
-                label: 'Chase Credit Card',
+                // Transaction Date,Post Date,Description,Category,Type,Amount,Memo
                 date: 'Transaction Date', desc: 'Description', amount: 'Amount', category: 'Category',
                 amountNegIsExpense: true
             },
-            chase_debit: {
-                label: 'Chase Checking',
-                date: 'Posting Date', desc: 'Description', amount: 'Amount',
-                amountNegIsExpense: true
-            },
             citi: {
-                label: 'Citi Credit Card',
+                // Status,Date,Description,Debit,Credit,Member Name
                 date: 'Date', desc: 'Description', debit: 'Debit', credit: 'Credit'
             },
             amex: {
-                label: 'Amex',
                 date: 'Date', desc: 'Description', amount: 'Amount',
-                amountNegIsExpense: false // Amex: positive = expense
+                amountNegIsExpense: false // Amex: positive = charge
+            },
+            gap: {
+                // 4 junk lines, then: Transaction Date,Description,Category,Amount,Card Last 4 Digits,Purchased by
+                date: 'Transaction Date', desc: 'Description', amount: 'Amount', category: 'Category',
+                amountNegIsExpense: false // positive = charge
+            },
+            nordstrom: {
+                // ...Counter party name,Currency,Amount,Credit/debit indicator,Book date,...Description,Category,...
+                date: 'Book date', desc: 'Description', amount: 'Amount',
+                creditDebitCol: 'Credit/debit indicator', category: 'Category'
             },
             keybank: {
-                label: 'Key Bank',
+                // 2 junk lines, then: Date,Amount,Description,Ref.#
                 date: 'Date', desc: 'Description', amount: 'Amount',
                 amountNegIsExpense: true
             },
             usbank: {
-                label: 'US Bank',
+                // "Date","Transaction","Name","Memo","Amount"
+                date: 'Date', desc: 'Name', amount: 'Amount',
+                amountNegIsExpense: true
+            },
+            onpoint: {
+                // Account Number,Post Date,Check,Description,Debit,Credit,Status,Balance,Classification
+                date: 'Post Date', desc: 'Description', debit: 'Debit', credit: 'Credit', category: 'Classification'
+            },
+            paypal: {
+                // "Date","Time","TimeZone","Name",...,"Amount",...
                 date: 'Date', desc: 'Name', amount: 'Amount',
                 amountNegIsExpense: true
             },
             bofa: {
-                label: 'Bank of America',
                 date: 'Date', desc: 'Description', amount: 'Amount',
                 amountNegIsExpense: true
             },
             capitalone: {
-                label: 'Capital One',
                 date: 'Transaction Date', desc: 'Description', debit: 'Debit', credit: 'Credit', category: 'Category'
             },
             wellsfargo: {
-                label: 'Wells Fargo',
                 date: 'Date', desc: 'Description', amount: 'Amount',
                 amountNegIsExpense: true
             },
-            paypal: {
-                label: 'PayPal',
-                date: 'Date', desc: 'Name', amount: 'Gross',
-                amountNegIsExpense: true
-            },
             discover: {
-                label: 'Discover',
                 date: 'Trans. Date', desc: 'Description', amount: 'Amount', category: 'Category',
                 amountNegIsExpense: true
             }
@@ -354,16 +363,23 @@
         function autoDetectBank() {
             const joined = headers.join('|').toLowerCase();
             let detected = '';
-            if (joined.includes('transaction date') && joined.includes('post date') && joined.includes('category'))
+
+            if (joined.includes('transaction date') && joined.includes('post date') && joined.includes('memo'))
                 detected = 'chase_credit';
-            else if (joined.includes('posting date') && joined.includes('details'))
-                detected = 'chase_debit';
-            else if (joined.includes('member name') && joined.includes('debit') && joined.includes('credit'))
+            else if (joined.includes('member name') && joined.includes('status') && joined.includes('debit'))
                 detected = 'citi';
-            else if (joined.includes('card member') || (joined.includes('date') && joined.includes('description') && joined.includes('amount') && headers.length <= 5 && joined.includes('extended')))
-                detected = 'amex';
-            else if (joined.includes('gross') && joined.includes('fee') && joined.includes('net'))
+            else if (joined.includes('credit/debit indicator') && joined.includes('book date'))
+                detected = 'nordstrom';
+            else if (joined.includes('classification') && joined.includes('post date'))
+                detected = 'onpoint';
+            else if (joined.includes('card last 4 digits') || joined.includes('purchased by'))
+                detected = 'gap';
+            else if (joined.includes('timezone') && joined.includes('fees'))
                 detected = 'paypal';
+            else if (joined.includes('ref.#'))
+                detected = 'keybank';
+            else if (joined.includes('transaction') && joined.includes('name') && joined.includes('memo') && headers.length === 5)
+                detected = 'usbank';
             else if (joined.includes('trans. date'))
                 detected = 'discover';
 
@@ -377,6 +393,7 @@
             const presetKey = document.getElementById('bankPreset').value;
             if (!presetKey || !BANK_PRESETS[presetKey]) return;
             const preset = BANK_PRESETS[presetKey];
+            activePresetKey = presetKey;
 
             function findCol(headerName) {
                 if (!headerName) return '';
@@ -392,10 +409,11 @@
             document.getElementById('mapCategory').value = findCol(preset.category);
         };
 
-        // CSV Parsing
+        // ===== CSV Parsing =====
         let rawRows = [];
         let headers = [];
         let parsedTransactions = [];
+        let activePresetKey = '';
 
         function parseCSVLine(line) {
             const result = [];
@@ -427,22 +445,36 @@
             return result;
         }
 
+        // Find the real header row (skip junk like account numbers, balances)
+        function findHeaderRow(lines) {
+            const keywords = ['date', 'description', 'amount', 'debit', 'credit', 'transaction', 'name', 'status', 'balance', 'category'];
+            for (let i = 0; i < Math.min(lines.length, 10); i++) {
+                const parsed = parseCSVLine(lines[i]);
+                const lower = parsed.map(c => c.toLowerCase().trim());
+                const matches = lower.filter(col => keywords.some(kw => col.includes(kw))).length;
+                if (matches >= 2 && parsed.length >= 3) return i;
+            }
+            return 0;
+        }
+
         function loadCSV(text) {
-            const lines = text.split(/\r?\n/).filter(l => l.trim());
-            if (lines.length < 2) { alert('CSV needs at least a header row and one data row'); return; }
+            const allLines = text.split(/\r?\n/).filter(l => l.trim());
+            if (allLines.length < 2) { alert('CSV needs at least a header row and one data row'); return; }
+
+            // Auto-skip junk lines (Gap has 4, Key has 2, etc.)
+            const headerIdx = findHeaderRow(allLines);
+            const lines = allLines.slice(headerIdx);
 
             headers = parseCSVLine(lines[0]);
-            rawRows = lines.slice(1).map(l => parseCSVLine(l)).filter(r => r.length >= headers.length - 1);
+            rawRows = lines.slice(1).map(l => parseCSVLine(l)).filter(r => r.length >= Math.max(headers.length - 2, 2));
 
             // Show raw preview
             const rawTable = document.getElementById('rawTable');
             const previewRows = rawRows.slice(0, 5);
 
-            // Try to auto-detect bank format from headers
-            autoDetectBank();
             rawTable.innerHTML = `
                 <thead><tr>${headers.map((h, i) => `<th title="Column ${i}">${h}</th>`).join('')}</tr></thead>
-                <tbody>${previewRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+                <tbody>${previewRows.map(r => `<tr>${headers.map((_, i) => `<td>${r[i] || ''}</td>`).join('')}</tr>`).join('')}</tbody>
             `;
             document.getElementById('rawPreview').style.display = '';
 
@@ -456,20 +488,32 @@
                 document.getElementById(id).innerHTML = optionalColOptions;
             });
 
-            // Auto-detect common column names
-            headers.forEach((h, i) => {
-                const lower = h.toLowerCase();
-                if (lower.includes('date') && !lower.includes('post')) document.getElementById('mapDate').value = i;
-                if (lower.includes('description') || lower.includes('memo') || lower.includes('name') || lower.includes('payee'))
-                    document.getElementById('mapDesc').value = i;
-                if (lower === 'amount') document.getElementById('mapAmount').value = i;
-                if (lower === 'debit') document.getElementById('mapDebit').value = i;
-                if (lower === 'credit') document.getElementById('mapCredit').value = i;
-                if (lower === 'category' || lower === 'type') document.getElementById('mapCategory').value = i;
-            });
+            // Try auto-detect first, then fallback to generic column name matching
+            activePresetKey = '';
+            autoDetectBank();
+
+            if (!activePresetKey) {
+                // Generic auto-map by common column names
+                headers.forEach((h, i) => {
+                    const lower = h.toLowerCase().trim();
+                    if (lower.includes('date') && !lower.includes('post')) document.getElementById('mapDate').value = i;
+                    if (lower === 'description' || lower === 'name' || lower === 'payee')
+                        document.getElementById('mapDesc').value = i;
+                    if (lower === 'amount') document.getElementById('mapAmount').value = i;
+                    if (lower === 'debit') document.getElementById('mapDebit').value = i;
+                    if (lower === 'credit') document.getElementById('mapCredit').value = i;
+                    if (lower === 'category' || lower === 'classification')
+                        document.getElementById('mapCategory').value = i;
+                });
+            }
 
             document.getElementById('mappingSection').style.display = '';
             document.getElementById('parsedPreview').style.display = 'none';
+
+            if (headerIdx > 0) {
+                document.getElementById('rawPreview').querySelector('.section-title').textContent =
+                    `CSV Preview (skipped ${headerIdx} header line${headerIdx > 1 ? 's' : ''}, showing first 5 data rows)`;
+            }
         }
 
         // File handling
@@ -493,7 +537,7 @@
             reader.readAsText(file);
         }
 
-        // Parse & Preview
+        // ===== Parse & Preview =====
         document.getElementById('parseBtn').addEventListener('click', () => {
             const dateCol = parseInt(document.getElementById('mapDate').value);
             const descCol = parseInt(document.getElementById('mapDesc').value);
@@ -512,31 +556,65 @@
             const spender = document.getElementById('assignSpender').value;
             const defaultCat = document.getElementById('assignCategory').value;
 
+            // Get active preset config for special handling
+            const preset = BANK_PRESETS[activePresetKey] || {};
+            const negIsExpense = preset.amountNegIsExpense !== undefined ? preset.amountNegIsExpense : true;
+
+            // Nordstrom-style: Credit/debit indicator column
+            let cdiCol = null;
+            if (preset.creditDebitCol) {
+                cdiCol = headers.findIndex(h => h.toLowerCase().trim() === preset.creditDebitCol.toLowerCase().trim());
+                if (cdiCol < 0) cdiCol = null;
+            }
+
             parsedTransactions = [];
             let skipped = 0;
 
             for (const row of rawRows) {
                 let amount;
-                if (debitCol !== null) {
-                    // Separate debit/credit columns
+
+                if (cdiCol !== null && amountCol !== null) {
+                    // Nordstrom-style: amount is always positive, indicator tells direction
+                    amount = parseFloat((row[amountCol] || '').replace(/[$,]/g, ''));
+                    if (isNaN(amount) || amount === 0) { skipped++; continue; }
+                    const indicator = (row[cdiCol] || '').toLowerCase().trim();
+                    if (indicator === 'credit') {
+                        // Credit = payment to card, skip as income
+                        if (skipPositive) { skipped++; continue; }
+                        amount = 0; skipped++; continue;
+                    }
+                    // Debit = purchase/expense — keep as-is
+                } else if (debitCol !== null) {
+                    // Separate debit/credit columns (Citi, OnPoint, Capital One)
                     const debit = parseFloat((row[debitCol] || '').replace(/[$,]/g, ''));
-                    const credit = creditCol !== null ? parseFloat((row[creditCol] || '').replace(/[$,]/g, '')) : 0;
+                    const credit = creditCol !== null ? parseFloat((row[creditCol] || '').replace(/[$,]/g, '')) : NaN;
                     if (!isNaN(debit) && debit > 0) {
                         amount = debit;
                     } else if (!isNaN(credit) && credit > 0) {
                         if (skipPositive) { skipped++; continue; }
-                        amount = -credit; // Negative = income/refund
+                        amount = credit;
                     } else {
                         skipped++;
                         continue;
                     }
                 } else {
+                    // Single amount column
                     amount = parseFloat((row[amountCol] || '').replace(/[$,]/g, ''));
                     if (isNaN(amount) || amount === 0) { skipped++; continue; }
-                    // Some banks use negative for expenses, some use positive
-                    // If negative, flip to positive (it's an expense)
-                    if (amount < 0) amount = Math.abs(amount);
-                    else if (skipPositive) { skipped++; continue; }
+
+                    if (negIsExpense) {
+                        // Negative = expense (Chase, Key Bank, US Bank, PayPal, etc.)
+                        if (amount > 0) {
+                            if (skipPositive) { skipped++; continue; }
+                        }
+                        amount = Math.abs(amount);
+                    } else {
+                        // Positive = expense (Amex, Gap)
+                        if (amount < 0) {
+                            if (skipPositive) { skipped++; continue; }
+                            amount = Math.abs(amount);
+                        }
+                    }
                 }
 
                 // Parse date
@@ -545,7 +623,7 @@
                 if (!parsedDate) { skipped++; continue; }
 
                 const [y, m] = parsedDate.split('-');
-                const bankCat = catCol !== null ? row[catCol] : null;
+                const bankCat = catCol !== null ? (row[catCol] || '').trim() : null;
                 const category = mapCategory(bankCat) || defaultCat;
 
                 parsedTransactions.push({
@@ -569,7 +647,6 @@
                 <div class="stat"><div class="stat-num">$${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total</div></div>
             `;
 
-            // Show preview table
             const body = document.getElementById('parsedBody');
             body.innerHTML = parsedTransactions.map(t => `
                 <tr>
@@ -586,30 +663,23 @@
         });
 
         function parseDate(str) {
-            // Try common formats: MM/DD/YYYY, YYYY-MM-DD, M/D/YYYY, MM-DD-YYYY, DD/MM/YYYY
-            let d;
-            // ISO format
-            if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-                return str.slice(0, 10);
-            }
-            // MM/DD/YYYY or M/D/YYYY
+            if (!str) return null;
+            str = str.trim();
+            // ISO: YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+            // MM/DD/YYYY or M/D/YYYY or MM-DD-YYYY
             const slashMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
             if (slashMatch) {
                 const [, a, b, year] = slashMatch;
-                // Assume MM/DD/YYYY (US format, most common for US banks)
-                const month = a.padStart(2, '0');
-                const day = b.padStart(2, '0');
-                return `${year}-${month}-${day}`;
+                return `${year}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`;
             }
-            // Try Date.parse as fallback
-            d = new Date(str);
-            if (!isNaN(d.getTime())) {
-                return d.toISOString().slice(0, 10);
-            }
+            // Fallback
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
             return null;
         }
 
-        // Import
+        // ===== Import =====
         document.getElementById('importBtn').addEventListener('click', async () => {
             if (!currentUser || parsedTransactions.length === 0) return;
             const btn = document.getElementById('importBtn');
@@ -618,14 +688,12 @@
             const progressFill = document.getElementById('progressFill');
             const statusEl = document.getElementById('importStatus');
             log.innerHTML = '';
-            let imported = 0;
-            let errors = 0;
+            let imported = 0, errors = 0;
 
             for (let i = 0; i < parsedTransactions.length; i++) {
                 const t = parsedTransactions[i];
                 try {
-                    const newRef = push(ref(db, `households/${currentUser.uid}/transactions`));
-                    await set(newRef, t);
+                    await set(push(ref(db, `households/${currentUser.uid}/transactions`)), t);
                     imported++;
                     log.innerHTML += `<div class="log-success">✓ ${t.date} — ${t.description} — $${t.amount.toFixed(2)}</div>`;
                 } catch (err) {
@@ -643,14 +711,13 @@
 
         // Clear
         document.getElementById('clearBtn').addEventListener('click', () => {
-            rawRows = [];
-            headers = [];
-            parsedTransactions = [];
+            rawRows = []; headers = []; parsedTransactions = []; activePresetKey = '';
             document.getElementById('rawPreview').style.display = 'none';
             document.getElementById('mappingSection').style.display = 'none';
             document.getElementById('parsedPreview').style.display = 'none';
             document.getElementById('log').innerHTML = '';
             document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('bankPreset').value = '';
             fileInput.value = '';
         });
     </script>
