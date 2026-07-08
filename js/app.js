@@ -370,7 +370,7 @@ function monthNavHtml() {
             <button onclick="window._prevMonth()">◀</button>
             <span class="month-label">${monthLabel(selectedMonth)}</span>
             <button onclick="window._nextMonth()">▶</button>
-            ${selectedMonth !== getCurrentMonth() ? `<button class="btn btn-sm btn-surface" onclick="window._goToday()" style="margin-left:0.5rem">Today</button>` : ''}
+            ${selectedMonth !== getCurrentMonth() ? `<button class="month-today-btn" onclick="window._goToday()">Today</button>` : ''}
         </div>`;
 }
 
@@ -417,9 +417,13 @@ function getRecurringStatus() {
             const tDesc = (t.description || '').toUpperCase();
             const tAmount = Number(t.amount || 0);
             const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
+            const amountExact = rAmount > 0 && Math.abs(tAmount - rAmount) < 0.01;
             const rWords = rName.split(/\s+/).filter(w => w.length > 2);
             const descMatch = rWords.some(w => tDesc.includes(w));
-            if (amountClose && descMatch) {
+
+            // Match if: (close amount + description match) OR (exact amount for specific non-round numbers)
+            const isRoundNumber = rAmount === Math.round(rAmount) && rAmount % 50 === 0;
+            if ((amountClose && descMatch) || (amountExact && !isRoundNumber)) {
                 foundInTxns = true;
                 break;
             }
