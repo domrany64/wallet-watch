@@ -133,7 +133,7 @@ Transaction matching uses two strategies:
 1. Close amount (±20%) + description keyword match
 2. Exact amount match for non-round numbers (handles renamed bills, e.g. mortgage servicer changes)
 
-Round numbers ($50, $100, $500, etc.) require description match to avoid false positives.
+Round numbers ($50, $100, $500, etc.) require description match to avoid false positives. Each matched transaction is **consumed** from the pool so it can only satisfy one recurring item — prevents double-matching for biweekly items like paychecks.
 
 Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card expands a detail panel listing each recurring item with its status (✅ Paid, ⚠️ Late, ⏳ Expected), amount, due day, and linked account.
 

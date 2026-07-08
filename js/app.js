@@ -397,44 +397,45 @@ function renderWelcome() {
 }
 
 // ===== Recurring Status Helpers =====
+
+// Shared matching: finds a matching transaction and removes it from the pool so it can't match twice
+function findMatchingTxn(rName, rAmount, txnPool) {
+    const rWords = rName.toUpperCase().replace(/\s+/g, ' ').trim().split(/\s+/).filter(w => w.length > 2);
+    const isRoundNumber = rAmount === Math.round(rAmount) && rAmount % 50 === 0;
+
+    for (let i = 0; i < txnPool.length; i++) {
+        const t = txnPool[i];
+        const tDesc = (t.description || '').toUpperCase();
+        const tAmount = Number(t.amount || 0);
+        const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
+        const amountExact = rAmount > 0 && Math.abs(tAmount - rAmount) < 0.01;
+        const descMatch = rWords.some(w => tDesc.includes(w));
+
+        if ((amountClose && descMatch) || (amountExact && !isRoundNumber)) {
+            txnPool.splice(i, 1); // consume this transaction
+            return true;
+        }
+    }
+    return false;
+}
+
 function getRecurringStatus() {
     const recurringItems = Object.values(data.recurring).filter(r => r.active !== false && r.type !== 'income');
-    const monthTxns = getMonthTransactions().filter(t => t.txnType !== 'income');
+    const txnPool = [...getMonthTransactions().filter(t => t.txnType !== 'income')];
     const isCurrentMonth = selectedMonth === getCurrentMonth();
     const isFutureMonth = selectedMonth > getCurrentMonth();
     const isPastMonth = selectedMonth < getCurrentMonth();
     const today = dayOfMonth();
 
-    let paidCount = 0;
-    let paidTotal = 0;
-    let lateCount = 0;
-    let lateTotal = 0;
-    let unpaidTotal = 0;
-    const items = []; // per-item detail
+    let paidCount = 0, paidTotal = 0, lateCount = 0, lateTotal = 0, unpaidTotal = 0;
+    const items = [];
 
     recurringItems.forEach(r => {
-        const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
         const rAmount = Number(r.amount || 0);
-
-        let foundInTxns = false;
-        for (const t of monthTxns) {
-            const tDesc = (t.description || '').toUpperCase();
-            const tAmount = Number(t.amount || 0);
-            const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
-            const amountExact = rAmount > 0 && Math.abs(tAmount - rAmount) < 0.01;
-            const rWords = rName.split(/\s+/).filter(w => w.length > 2);
-            const descMatch = rWords.some(w => tDesc.includes(w));
-
-            // Match if: (close amount + description match) OR (exact amount for specific non-round numbers)
-            const isRoundNumber = rAmount === Math.round(rAmount) && rAmount % 50 === 0;
-            if ((amountClose && descMatch) || (amountExact && !isRoundNumber)) {
-                foundInTxns = true;
-                break;
-            }
-        }
+        const found = findMatchingTxn(r.name || '', rAmount, txnPool);
 
         let status;
-        if (foundInTxns) {
+        if (found) {
             status = 'paid';
             paidCount++;
             paidTotal += rAmount;
@@ -471,40 +472,22 @@ function getRecurringStatus() {
 
 function getIncomeStatus() {
     const incomeItems = Object.values(data.recurring).filter(r => r.active !== false && r.type === 'income');
-    const monthTxns = getMonthTransactions().filter(t => t.txnType === 'income');
+    const txnPool = [...getMonthTransactions().filter(t => t.txnType === 'income')];
     const isCurrentMonth = selectedMonth === getCurrentMonth();
     const isFutureMonth = selectedMonth > getCurrentMonth();
     const isPastMonth = selectedMonth < getCurrentMonth();
     const today = dayOfMonth();
 
-    let totalExpected = 0;
-    let receivedTotal = 0;
-    let receivedCount = 0;
-    let pendingTotal = 0;
+    let totalExpected = 0, receivedTotal = 0, receivedCount = 0, pendingTotal = 0;
     const items = [];
 
     incomeItems.forEach(r => {
-        const rName = (r.name || '').toUpperCase().replace(/\s+/g, ' ').trim();
         const rAmount = Number(r.amount || 0);
         totalExpected += rAmount;
-
-        let foundInTxns = false;
-        for (const t of monthTxns) {
-            const tDesc = (t.description || '').toUpperCase();
-            const tAmount = Number(t.amount || 0);
-            const amountClose = rAmount > 0 && Math.abs(tAmount - rAmount) / rAmount < 0.2;
-            const amountExact = rAmount > 0 && Math.abs(tAmount - rAmount) < 0.01;
-            const rWords = rName.split(/\s+/).filter(w => w.length > 2);
-            const descMatch = rWords.some(w => tDesc.includes(w));
-            const isRoundNumber = rAmount === Math.round(rAmount) && rAmount % 50 === 0;
-            if ((amountClose && descMatch) || (amountExact && !isRoundNumber)) {
-                foundInTxns = true;
-                break;
-            }
-        }
+        const found = findMatchingTxn(r.name || '', rAmount, txnPool);
 
         let status;
-        if (foundInTxns) {
+        if (found) {
             status = 'received';
             receivedCount++;
             receivedTotal += rAmount;
