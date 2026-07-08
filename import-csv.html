@@ -588,11 +588,13 @@
                     // Separate debit/credit columns (Citi, OnPoint, Capital One)
                     const debit = parseFloat((row[debitCol] || '').replace(/[$,]/g, ''));
                     const credit = creditCol !== null ? parseFloat((row[creditCol] || '').replace(/[$,]/g, '')) : NaN;
-                    if (!isNaN(debit) && debit > 0) {
-                        amount = debit;
-                    } else if (!isNaN(credit) && credit > 0) {
+                    if (!isNaN(debit) && debit !== 0) {
+                        // Debit column has a value — treat as expense
+                        amount = Math.abs(debit);
+                    } else if (!isNaN(credit) && credit !== 0) {
+                        // Credit column has a value — payment/refund (skip by default)
                         if (skipPositive) { skipped++; continue; }
-                        amount = credit;
+                        amount = Math.abs(credit);
                     } else {
                         skipped++;
                         continue;
