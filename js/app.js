@@ -776,7 +776,9 @@ function renderTransactions() {
     if (txnFilters.spender) filtered = filtered.filter(t => t.spender === txnFilters.spender);
     if (txnFilters.category) filtered = filtered.filter(t => t.category === txnFilters.category);
 
-    const expenseTotal = filtered.filter(t => t.txnType !== 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+    const expensesOnly = filtered.filter(t => t.txnType === 'expense' || (!t.txnType && t.txnType !== 'income' && t.txnType !== 'refund')).reduce((s, t) => s + Number(t.amount || 0), 0);
+    const refundTotal = filtered.filter(t => t.txnType === 'refund').reduce((s, t) => s + Number(t.amount || 0), 0);
+    const expenseTotal = expensesOnly - refundTotal;
     const incomeTotal = filtered.filter(t => t.txnType === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
     const today = new Date().toISOString().split('T')[0];
 
