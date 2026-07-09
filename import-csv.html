@@ -603,9 +603,16 @@
                     // Nordstrom-style: amount is always positive, indicator tells direction
                     amount = parseFloat((row[amountCol] || '').replace(/[$,]/g, ''));
                     if (isNaN(amount) || amount === 0) { skipped++; continue; }
+                    amount = Math.abs(amount);
                     const indicator = (row[cdiCol] || '').toLowerCase().trim();
                     if (indicator === 'credit') {
-                        txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
+                        if (paymentPatterns.test(descLower) || transferPatterns.test(descLower)) {
+                            txnType = 'transfer';
+                        } else if (preset.creditCard) {
+                            txnType = 'refund';
+                        } else {
+                            txnType = 'income';
+                        }
                     }
                 } else if (debitCol !== null) {
                     // Separate debit/credit columns (Citi, OnPoint, Capital One)
