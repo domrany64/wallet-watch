@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import { getDatabase, ref, push, set, update, remove, onValue, get } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import { CATEGORY_MAPPINGS_GROUPED, DEFAULT_CATEGORY_MAPPINGS } from "./categories.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDyQ6QQQ0Jb3DHT-zzYxbBJ8mJ12yxjt48",
@@ -98,67 +99,7 @@ const CATEGORIES = {
     other: { icon: '📦', label: 'Other' }
 };
 
-// ===== Description-to-Category Mapping =====
-// Built-in defaults. User overrides stored in Firebase settings.categoryMappings
-// Format: category -> list of description patterns to match
-const CATEGORY_MAPPINGS_GROUPED = {
-    transport: [
-        'COSTCO GAS', 'ARCO', '76 -', 'SPEEDWAY', 'SHELL', 'CHEVRON',
-        'PARKING', 'PDX AIRPORT', 'SEA AIRPORT', 'KAADY CAR WASH',
-        'UBER', 'LYFT', 'RTC'
-    ],
-    groceries: [
-        'COSTCO WHSE', 'WWW COSTCO COM', 'TRADER JOE', 'SAFEWAY', 'QFC',
-        'FRED-MEYER', 'WINCO', 'GROCERY OUTLET', 'WHOLEFDS', 'WHOLE FOODS',
-        'MARKET OF CHOICE', 'BAZAAR WORLD FOOD', 'BAZAAR FOOD MARKET',
-        'FRESH HALAL MEAT', 'ARIANA FOOD MARKET', 'ROSE INTERNATIONAL',
-        'UNIQUE INTERNATIONAL MAR', 'PERSIA FOODS', 'CHEFSTORE',
-        'BARBUR WORLD FOODS'
-    ],
-    dining: [
-        'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
-        'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS',
-        'TST*', 'GYRO', 'CORNER BAKERY', 'CHENNAI MASALA', 'NONNA EMILIA',
-        'CHINESE GOURMET', 'SWEET SATISFACTION', 'SIZZLE PIE', '85C BAKERY',
-        'BASKIN', 'LIFE CAFE', 'PIZZA', 'RESTAURANT', 'RISTORANTE',
-        'GRILL', 'BAKERY', 'GELATERIA', 'BUFFET', 'DONUTS'
-    ],
-    shopping: [
-        'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS',
-        'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS',
-        'NORDSTROM', 'GAP US', 'H&M', 'CLAIRE', 'DOLLAR TREE',
-        'BATH AND BODY', 'SEPHORA', 'ULTA', 'NIKE.COM',
-        'UPS STORE', 'FEDEX'
-    ],
-    personal: ['SHISEIDO', 'DERMSTORE'],
-    housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'MR.COOPER', 'SPRINGVILLE TOWNHO'],
-    healthcare: [
-        'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
-        'KP WESTSIDE RX', 'WALGREENS', 'CVS/PHARMACY', 'PHARMACY'
-    ],
-    travel: [
-        'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
-        'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'NOVOTEL'
-    ],
-    education: ['SCHOLASTIC', 'PCC ROCK CREEK', 'BEAVERTON SD'],
-    entertainment: [
-        'MYSTERY SPOT', 'TECH INTERACTIVE', 'SANTA CRUZ BEACH',
-        'SKY ZONE', 'SUPERPLAY', 'TUALATIN HILLS PARK', 'YOSEMITE',
-        '24 HOUR FITNESS'
-    ],
-    subscriptions: ['NETFLIX', 'SPOTIFY', 'HULU', 'DISNEY', 'AMAZON PRIME', 'APPLE.COM', 'ANCESTRY.COM'],
-    utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY', 'WASTE MANAGEMENT'],
-    insurance: ['INSURANCE'],
-    childcare: ['BEAVERTON SD'],
-};
-
-// Flatten grouped mappings for lookup
-const DEFAULT_CATEGORY_MAPPINGS = {};
-for (const [category, patterns] of Object.entries(CATEGORY_MAPPINGS_GROUPED)) {
-    for (const pattern of patterns) {
-        DEFAULT_CATEGORY_MAPPINGS[pattern] = category;
-    }
-}
+// Category mappings imported from js/categories.js
 
 function matchDescriptionCategory(description) {
     if (!description) return null;
