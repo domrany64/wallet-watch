@@ -150,6 +150,10 @@ Refunds display with blue badge and +$ amount, and subtract from spending totals
 
 Credit card presets (Chase, Citi, Amex, Gap, Nordstrom) have `creditCard: true` flag. On credit cards, positive non-payment amounts are always classified as `refund`, never `income` (credit cards have no income).
 
+### Duplicate Detection (during import)
+
+Dedup key: `date|amount|description|txnType|cardId`. Same transaction on different cards = not a duplicate. Count-based: if DB has 1 matching row and CSV has 2, second one imports (handles real duplicates like two dental copays same day).
+
 ### Auto-Categorization
 
 Transactions are auto-categorized by matching description text against patterns:

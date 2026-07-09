@@ -764,7 +764,7 @@
             // Count-based dedup: key = date|amount|desc|txnType
             // If DB has 1 matching row and CSV has 2, import the second one
             function txnKey(t) {
-                return `${t.date}|${Number(t.amount).toFixed(2)}|${(t.description || '').toUpperCase().trim()}|${t.txnType || 'expense'}`;
+                return `${t.date}|${Number(t.amount).toFixed(2)}|${(t.description || '').toUpperCase().trim()}|${t.txnType || 'expense'}|${t.cardId || ''}`;
             }
 
             const dbCounts = {};
