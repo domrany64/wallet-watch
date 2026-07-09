@@ -639,8 +639,12 @@
                                 txnType = 'expense';
                             }
                         } else {
-                            // Positive = inflow
-                            txnType = 'income';
+                            // Positive = inflow — but check if it's a payment to card first
+                            if (paymentPatterns.test(descLower) || transferPatterns.test(descLower)) {
+                                txnType = 'transfer';
+                            } else {
+                                txnType = 'income';
+                            }
                         }
                     } else {
                         // Positive = expense (Amex, Gap)
