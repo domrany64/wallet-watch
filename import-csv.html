@@ -255,35 +255,52 @@
         }
 
         // Description-based category matching (same as main app)
-        const DESC_CATEGORY_DEFAULTS = {
-            'COSTCO GAS': 'transport', 'ARCO': 'transport', '76 -': 'transport', 'SPEEDWAY': 'transport', 'SHELL': 'transport', 'CHEVRON': 'transport',
-            'COSTCO WHSE': 'groceries', 'WWW COSTCO COM': 'groceries', 'TRADER JOE': 'groceries', 'SAFEWAY': 'groceries', 'QFC': 'groceries',
-            'FRED-MEYER': 'groceries', 'WINCO': 'groceries', 'GROCERY OUTLET': 'groceries', 'WHOLEFDS': 'groceries', 'WHOLE FOODS': 'groceries',
-            'MARKET OF CHOICE': 'groceries', 'BAZAAR WORLD FOOD': 'groceries', 'BAZAAR FOOD MARKET': 'groceries', 'FRESH HALAL MEAT': 'groceries',
-            'ARIANA FOOD MARKET': 'groceries', 'ROSE INTERNATIONAL': 'groceries', 'UNIQUE INTERNATIONAL MAR': 'groceries',
-            'PERSIA FOODS': 'groceries', 'CHEFSTORE': 'groceries', 'BARBUR WORLD FOODS': 'groceries',
-            'TARGET': 'shopping', 'TARGET.COM': 'shopping',
-            'MCDONALD': 'dining', 'SUBWAY': 'dining', 'PANDA EXPRESS': 'dining', 'IN-N-OUT': 'dining', 'JIMMY JOHN': 'dining',
-            'CHIPOTLE': 'dining', 'STARBUCKS': 'dining', 'PEETS': 'dining', 'SHAKE SHACK': 'dining', 'DUTCH BROS': 'dining',
-            'TST*': 'dining', 'SQ *': 'dining', 'GYRO': 'dining', 'CORNER BAKERY': 'dining', 'CHENNAI MASALA': 'dining',
-            'CHINESE GOURMET': 'dining', 'CAFE': 'dining', 'PIZZA': 'dining', 'RESTAURANT': 'dining', 'BAKERY': 'dining', 'GELATERIA': 'dining',
-            'AMAZON': 'shopping', 'MARSHALLS': 'shopping', 'HOMEGOODS': 'shopping', 'GOODWILL': 'shopping', 'ROSS STORES': 'shopping',
-            'BURLINGTON': 'shopping', 'JCPENNEY': 'shopping', 'MACYS': 'shopping', 'NORDSTROM': 'shopping', 'GAP US': 'shopping',
-            'H&M': 'shopping', 'CLAIRE': 'shopping', 'DOLLAR TREE': 'shopping', 'BATH AND BODY': 'shopping', 'SEPHORA': 'shopping', 'ULTA': 'shopping',
-            'HOME DEPOT': 'housing', 'RODDA PAINT': 'housing',
-            'KP NW DENTAL': 'healthcare', 'KP DENTAL': 'healthcare', 'KAISER DENTAL': 'healthcare', 'KP NW RX': 'healthcare',
-            'WALGREENS': 'healthcare', 'CVS/PHARMACY': 'healthcare',
-            'PARKING': 'transport', 'PDX AIRPORT': 'transport', 'SEA AIRPORT': 'transport', 'KAADY CAR WASH': 'transport',
-            'QATAR AIR': 'travel', 'SOUTHWES': 'travel', 'TURKISH AIR': 'travel', 'OVAGO AIR': 'travel', 'EXPEDIA': 'travel',
-            'HOTEL': 'travel', 'GREAT WOLF': 'travel', 'RITZ CARLTON': 'travel', 'TRENITALIA': 'travel',
-            'SCHOLASTIC': 'education', 'BEAVERTON SD': 'education',
-            'MYSTERY SPOT': 'entertainment', 'TECH INTERACTIVE': 'entertainment', 'SUPERPLAY': 'entertainment',
-            '24 HOUR FITNESS': 'entertainment', 'SKY ZONE': 'entertainment',
-            'ZIPLY FIBER': 'utilities', 'PORTLAND GENERAL': 'utilities', 'NORTHWEST NATURA': 'utilities',
-            'TUALATIN VALLEY': 'utilities', 'WASTE MANAGEMENT': 'utilities',
-            'ROCKET MORTGAGE': 'housing', 'SPRINGVILLE TOWNHO': 'housing',
-            'UPS STORE': 'shopping', 'FEDEX': 'shopping',
+        const DESC_CATEGORY_GROUPED = {
+            transport: [
+                'COSTCO GAS', 'ARCO', '76 -', 'SPEEDWAY', 'SHELL', 'CHEVRON',
+                'PARKING', 'PDX AIRPORT', 'SEA AIRPORT', 'KAADY CAR WASH', 'RTC'
+            ],
+            groceries: [
+                'COSTCO WHSE', 'WWW COSTCO COM', 'TRADER JOE', 'SAFEWAY', 'QFC',
+                'FRED-MEYER', 'WINCO', 'GROCERY OUTLET', 'WHOLEFDS', 'WHOLE FOODS',
+                'MARKET OF CHOICE', 'BAZAAR WORLD FOOD', 'BAZAAR FOOD MARKET',
+                'FRESH HALAL MEAT', 'ARIANA FOOD MARKET', 'ROSE INTERNATIONAL',
+                'UNIQUE INTERNATIONAL MAR', 'PERSIA FOODS', 'CHEFSTORE',
+                'BARBUR WORLD FOODS'
+            ],
+            dining: [
+                'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
+                'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS',
+                'TST*', 'GYRO', 'CORNER BAKERY', 'CHENNAI MASALA',
+                'CHINESE GOURMET', 'PIZZA', 'RESTAURANT', 'BAKERY', 'GELATERIA', 'DONUTS'
+            ],
+            shopping: [
+                'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS',
+                'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS',
+                'NORDSTROM', 'GAP US', 'H&M', 'CLAIRE', 'DOLLAR TREE',
+                'BATH AND BODY', 'SEPHORA', 'ULTA', 'UPS STORE', 'FEDEX'
+            ],
+            housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO'],
+            healthcare: [
+                'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
+                'WALGREENS', 'CVS/PHARMACY'
+            ],
+            travel: [
+                'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
+                'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA'
+            ],
+            education: ['SCHOLASTIC', 'BEAVERTON SD'],
+            entertainment: ['MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE'],
+            utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY', 'WASTE MANAGEMENT'],
         };
+
+        // Flatten for lookup
+        const DESC_CATEGORY_DEFAULTS = {};
+        for (const [category, patterns] of Object.entries(DESC_CATEGORY_GROUPED)) {
+            for (const pattern of patterns) {
+                DESC_CATEGORY_DEFAULTS[pattern] = category;
+            }
+        }
 
         function matchDescriptionCategory(description) {
             if (!description) return null;
