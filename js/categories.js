@@ -28,7 +28,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'BIGTOWNHERO', 'EATALY', 'BRAGANZA TEA', 'BUFFET', 'JAMBA JUICE', 'SIZZLE PIE',
         'PHILLY CHEESE', 'DOMINOS', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
         'HOLIDAY MOKA', 'MEAL CAFE', 'CHURROS', 'LIFE CAFE', 'Pizzeria',
-        'INTEL JF3 CAFE', 'ICE CREAM'
+        'INTEL JF3 CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT'
     ],
     shopping: [
         'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS',
@@ -48,12 +48,13 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
         'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano',
-        'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg'
+        'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg',
+        'HENRY COWELL REDW'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE'],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
-        'MARION ACRES', 'CRYSTAL SPRINGS', 'TUALATIN HILLS PARK'
+        'MARION ACRES', 'CRYSTAL SPRINGS', 'TUALATIN HILLS PARK', 'REGIONAL PARK BLUE'
     ],
     utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY', 'WASTE MANAGEMENT'],
 };
