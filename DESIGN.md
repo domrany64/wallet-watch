@@ -202,6 +202,12 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 - Preview table: date, description, old category (strikethrough), new category
 - Selectable per-row, bulk apply in single Firebase write
 
+### Delete by Card Tool (/delete-by-card.html)
+- Select a card/account from dropdown (shows transaction count per card)
+- Scans and shows how many transactions will be deleted
+- Confirmation required, then bulk deletes all matching transactions
+- Useful for cleaning up before re-importing a corrected CSV
+
 ### Recurring View
 - Grouped by type: Income, Bills, Subscriptions, Savings, Investments
 - Each item shows: name, amount, category, due day, linked account
