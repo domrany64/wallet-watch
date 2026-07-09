@@ -88,6 +88,7 @@ Apply these rules in your Firebase Console → Realtime Database → Rules:
   - 📍 OnPoint
   - 🅿️ PayPal
   - Plus Bank of America, Capital One, Wells Fargo, Discover
+- **Re-categorize:** [/recategorize.html](https://domrany64.github.io/wallet-watch/recategorize.html) — Bulk re-evaluate transactions against current category mappings after adding new patterns
 
 ## License
 

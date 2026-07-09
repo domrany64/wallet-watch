@@ -188,11 +188,19 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 
 ### Transactions View
 - Month selector
+- Date range mode (toggle checkbox, custom from/to dates)
 - Quick-add form (inline, always visible)
-- Filter bar: by card, spender, category
+- Filter bar: by card, spender, category (persistent across month navigation)
 - Transaction list sorted by date (newest first)
 - Income transactions shown with green +$ and INCOME badge
+- Refund transactions shown with blue +$ and REFUND badge
 - Separate totals: Spent (red) and Income (green)
+
+### Re-categorize Tool (/recategorize.html)
+- Scans all transactions against current mappings (built-in + user custom)
+- Option to only re-evaluate "Other" category (safe default)
+- Preview table: date, description, old category (strikethrough), new category
+- Selectable per-row, bulk apply in single Firebase write
 
 ### Recurring View
 - Grouped by type: Income, Bills, Subscriptions, Savings, Investments
