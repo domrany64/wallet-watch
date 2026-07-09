@@ -731,26 +731,44 @@
             const existingSnap = await get(ref(db, `households/${currentUser.uid}/transactions`));
             const existingTxns = Object.values(existingSnap.val() || {});
 
-            function isDuplicate(t) {
-                return existingTxns.some(e =>
-                    e.date === t.date &&
-                    Math.abs(Number(e.amount) - t.amount) < 0.01 &&
-                    (e.description || '').toUpperCase().trim() === (t.description || '').toUpperCase().trim()
-                );
+            // Count-based dedup: key = date|amount|desc|txnType
+            // If DB has 1 matching row and CSV has 2, import the second one
+            function txnKey(t) {
+                return `${t.date}|${Number(t.amount).toFixed(2)}|${(t.description || '').toUpperCase().trim()}|${t.txnType || 'expense'}`;
             }
+
+            const dbCounts = {};
+            existingTxns.forEach(e => {
+                const k = txnKey(e);
+                dbCounts[k] = (dbCounts[k] || 0) + 1;
+            });
+
+            // Count how many of each key CSV wants to import
+            const csvCounts = {};
+            parsedTransactions.forEach(t => {
+                const k = txnKey(t);
+                csvCounts[k] = (csvCounts[k] || 0) + 1;
+            });
+
+            // Track how many we've seen so far per key during import loop
+            const seenCounts = {};
 
             let imported = 0, skipped = 0, errors = 0;
 
             for (let i = 0; i < parsedTransactions.length; i++) {
                 const t = parsedTransactions[i];
-                if (isDuplicate(t)) {
+                const k = txnKey(t);
+                seenCounts[k] = (seenCounts[k] || 0) + 1;
+
+                // Duplicate if DB already has enough of this exact key
+                // e.g. DB has 1, CSV has 2: first one is dup, second imports
+                if (seenCounts[k] <= (dbCounts[k] || 0)) {
                     skipped++;
                     log.innerHTML += `<div class="log-skip">⏭ ${t.date} — ${t.description} — $${t.amount.toFixed(2)} (duplicate)</div>`;
                 } else {
                     try {
                         await set(push(ref(db, `households/${currentUser.uid}/transactions`)), t);
                         imported++;
-                        existingTxns.push(t); // add to dedup list for subsequent rows
                         log.innerHTML += `<div class="log-success">✓ ${t.date} — ${t.description} — $${t.amount.toFixed(2)}</div>`;
                     } catch (err) {
                         errors++;
