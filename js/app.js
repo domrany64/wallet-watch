@@ -65,6 +65,10 @@ let data = {
 let currentView = 'dashboard';
 let selectedMonth = getCurrentMonth();
 let listeners = [];
+let txnFilters = { card: '', spender: '', category: '' };
+let dateRangeMode = false;
+let dateRangeFrom = '';
+let dateRangeTo = '';
 
 function getCurrentMonth() {
     const d = new Date();
@@ -807,16 +811,48 @@ function txnItemHtml(t) {
 
 // ===== RENDER: Transactions =====
 function renderTransactions() {
-    const txns = getMonthTransactions().sort((a, b) => {
+    let txns;
+    let periodLabel;
+
+    if (dateRangeMode && dateRangeFrom && dateRangeTo) {
+        txns = Object.entries(data.transactions)
+            .filter(([, t]) => t.date >= dateRangeFrom && t.date <= dateRangeTo)
+            .map(([id, t]) => ({ id, ...t }));
+        periodLabel = `${dateRangeFrom} to ${dateRangeTo}`;
+    } else {
+        txns = getMonthTransactions();
+        periodLabel = monthLabel(selectedMonth);
+    }
+
+    txns.sort((a, b) => {
         if (a.date !== b.date) return (b.date || '').localeCompare(a.date || '');
         return (b.createdAt || 0) - (a.createdAt || 0);
     });
-    const expenseTotal = txns.filter(t => t.txnType !== 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
-    const incomeTotal = txns.filter(t => t.txnType === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+
+    // Apply persistent filters
+    let filtered = txns;
+    if (txnFilters.card) filtered = filtered.filter(t => t.cardId === txnFilters.card);
+    if (txnFilters.spender) filtered = filtered.filter(t => t.spender === txnFilters.spender);
+    if (txnFilters.category) filtered = filtered.filter(t => t.category === txnFilters.category);
+
+    const expenseTotal = filtered.filter(t => t.txnType !== 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+    const incomeTotal = filtered.filter(t => t.txnType === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
     const today = new Date().toISOString().split('T')[0];
 
     mainContent.innerHTML = `
-        ${monthNavHtml()}
+        ${dateRangeMode ? '' : monthNavHtml()}
+
+        <div class="filter-bar" style="margin-bottom:1rem">
+            <label class="check" style="font-size:0.8rem">
+                <input type="checkbox" id="dateRangeToggle" ${dateRangeMode ? 'checked' : ''} onchange="window._toggleDateRange()">
+                Date range
+            </label>
+            ${dateRangeMode ? `
+                <input type="date" id="dateFrom" value="${dateRangeFrom}" onchange="window._updateDateRange()" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+                <span style="color:var(--text-muted)">to</span>
+                <input type="date" id="dateTo" value="${dateRangeTo}" onchange="window._updateDateRange()" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+            ` : ''}
+        </div>
 
         <div class="quick-add">
             <div class="quick-add-title">+ Quick Add Transaction</div>
@@ -875,22 +911,27 @@ function renderTransactions() {
         </div>
 
         <div class="txn-list" id="txnList">
-            ${txns.length === 0 ? '<div class="empty-state"><div class="emoji">📝</div><p>No transactions this month. Add one above!</p></div>' :
-                txns.map(t => txnItemHtml(t)).join('')}
+            ${filtered.length === 0 ? '<div class="empty-state"><div class="emoji">📝</div><p>No transactions found.</p></div>' :
+                filtered.map(t => txnItemHtml(t)).join('')}
         </div>
 
-        ${txns.length > 0 ? `
+        ${filtered.length > 0 ? `
         <div class="totals-bar">
-            <span class="total-label">Spent in ${monthLabel(selectedMonth)}</span>
+            <span class="total-label">Spent in ${periodLabel}</span>
             <span class="total-value" style="color:var(--danger)">-${fmt(expenseTotal)}</span>
         </div>
         ${incomeTotal > 0 ? `<div class="totals-bar" style="margin-top:0.5rem">
-            <span class="total-label">Income in ${monthLabel(selectedMonth)}</span>
+            <span class="total-label">Income in ${periodLabel}</span>
             <span class="total-value" style="color:var(--primary)">+${fmt(incomeTotal)}</span>
         </div>` : ''}` : ''}
     `;
 
     document.getElementById('quickAddForm').addEventListener('submit', handleQuickAdd);
+
+    // Restore persistent filter values
+    if (txnFilters.card) document.getElementById('filterCard').value = txnFilters.card;
+    if (txnFilters.spender) document.getElementById('filterSpender').value = txnFilters.spender;
+    if (txnFilters.category) document.getElementById('filterCategory').value = txnFilters.category;
 }
 
 function handleQuickAdd(e) {
@@ -922,25 +963,27 @@ function handleQuickAdd(e) {
 
 // Transaction filter (client-side)
 window._applyTxnFilter = () => {
-    const cardF = document.getElementById('filterCard')?.value || '';
-    const spenderF = document.getElementById('filterSpender')?.value || '';
-    const catF = document.getElementById('filterCategory')?.value || '';
+    txnFilters.card = document.getElementById('filterCard')?.value || '';
+    txnFilters.spender = document.getElementById('filterSpender')?.value || '';
+    txnFilters.category = document.getElementById('filterCategory')?.value || '';
+    renderTransactions();
+};
 
-    let txns = getMonthTransactions().sort((a, b) => {
-        if (a.date !== b.date) return (b.date || '').localeCompare(a.date || '');
-        return (b.createdAt || 0) - (a.createdAt || 0);
-    });
-
-    if (cardF) txns = txns.filter(t => t.cardId === cardF);
-    if (spenderF) txns = txns.filter(t => t.spender === spenderF);
-    if (catF) txns = txns.filter(t => t.category === catF);
-
-    const list = document.getElementById('txnList');
-    if (list) {
-        list.innerHTML = txns.length === 0
-            ? '<div class="empty-state"><p>No matching transactions</p></div>'
-            : txns.map(t => txnItemHtml(t)).join('');
+window._toggleDateRange = () => {
+    dateRangeMode = document.getElementById('dateRangeToggle')?.checked || false;
+    if (dateRangeMode && !dateRangeFrom) {
+        const d = new Date();
+        dateRangeTo = d.toISOString().split('T')[0];
+        d.setMonth(d.getMonth() - 1);
+        dateRangeFrom = d.toISOString().split('T')[0];
     }
+    renderTransactions();
+};
+
+window._updateDateRange = () => {
+    dateRangeFrom = document.getElementById('dateFrom')?.value || '';
+    dateRangeTo = document.getElementById('dateTo')?.value || '';
+    renderTransactions();
 };
 
 // Edit transaction
