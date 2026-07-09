@@ -394,6 +394,8 @@
                 detected = 'gap';
             else if (joined.includes('timezone') && joined.includes('fees'))
                 detected = 'paypal';
+            else if (joined.includes('card member') && joined.includes('account #'))
+                detected = 'amex';
             else if (joined.includes('ref.#'))
                 detected = 'keybank';
             else if (joined.includes('transaction') && joined.includes('name') && joined.includes('memo') && headers.length === 5)
