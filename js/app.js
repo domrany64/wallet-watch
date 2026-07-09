@@ -835,8 +835,18 @@ function renderTransactions() {
         </div>
 
         <div class="section-header">
-            <h2 class="section-title">Transactions (${txns.length})</h2>
+            <h2 class="section-title">Transactions (${filtered.length})</h2>
         </div>
+
+        ${filtered.length > 0 ? `
+        <div class="totals-bar" style="margin-bottom:1rem">
+            <span class="total-label">Spent in ${periodLabel}</span>
+            <span class="total-value" style="color:var(--danger)">-${fmt(expenseTotal)}</span>
+        </div>
+        ${incomeTotal > 0 ? `<div class="totals-bar" style="margin-bottom:1rem;margin-top:-0.5rem">
+            <span class="total-label">Income in ${periodLabel}</span>
+            <span class="total-value" style="color:var(--primary)">+${fmt(incomeTotal)}</span>
+        </div>` : ''}` : ''}
 
         <div class="filter-bar">
             <select id="filterCard" onchange="window._applyTxnFilter()">
@@ -857,16 +867,6 @@ function renderTransactions() {
             ${filtered.length === 0 ? '<div class="empty-state"><div class="emoji">📝</div><p>No transactions found.</p></div>' :
                 filtered.map(t => txnItemHtml(t)).join('')}
         </div>
-
-        ${filtered.length > 0 ? `
-        <div class="totals-bar">
-            <span class="total-label">Spent in ${periodLabel}</span>
-            <span class="total-value" style="color:var(--danger)">-${fmt(expenseTotal)}</span>
-        </div>
-        ${incomeTotal > 0 ? `<div class="totals-bar" style="margin-top:0.5rem">
-            <span class="total-label">Income in ${periodLabel}</span>
-            <span class="total-value" style="color:var(--primary)">+${fmt(incomeTotal)}</span>
-        </div>` : ''}` : ''}
     `;
 
     document.getElementById('quickAddForm').addEventListener('submit', handleQuickAdd);
@@ -1330,10 +1330,13 @@ function renderCards() {
     const cards = Object.entries(data.cards).map(([id, c]) => ({ id, ...c }));
     const monthTxns = getMonthTransactions();
 
-    // Per-card spending (expenses only)
+    // Per-card spending (expenses minus refunds)
     const cardSpending = {};
     monthTxns.filter(t => t.txnType !== 'income').forEach(t => {
-        if (t.cardId) cardSpending[t.cardId] = (cardSpending[t.cardId] || 0) + Number(t.amount || 0);
+        if (t.cardId) {
+            const sign = t.txnType === 'refund' ? -1 : 1;
+            cardSpending[t.cardId] = (cardSpending[t.cardId] || 0) + sign * Number(t.amount || 0);
+        }
     });
 
     // Group cards by type
