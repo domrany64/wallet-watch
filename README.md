@@ -10,7 +10,9 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 - **Smart "Still Expected"** — Recurring items matched against this month's transactions; only shows what hasn't been paid yet (e.g. "3 of 4 paid")
 - **Dynamic income tracking** — Income calculated from recurring income items; shows how much received vs still pending with clickable detail panel
 - **Transaction tracking** — Quick-add expenses with category, amount, card, spender, and description; income vs expense differentiation
-- **Income & expense classification** — Transactions auto-classified as income (green +$), expense (red -$), or transfer (auto-skipped to avoid double-counting)
+- **Income & expense classification** — Transactions auto-classified as income (green +$), expense (red -$), refund (blue +$, subtracts from spending), or transfer (auto-skipped to avoid double-counting)
+- **Auto-categorization** — 100+ built-in description-to-category mappings (Costco Gas = transport, Trader Joe = groceries, etc.) plus user-learned custom mappings
+- **Category learning** — When you change a transaction's category in the app, prompts to save the description pattern for future auto-categorization
 - **Recurring commitments** — Manage fixed monthly items grouped by type: Income, Bills, Subscriptions, Savings, and Investments
 - **Smart suggestions** — Analyzes transaction history to detect recurring patterns (2+ months) and suggests them as recurring items with accept/dismiss
 - **Multi-account support** — Track debit, credit, savings, investment, loan, and other accounts with institution icons (Key Bank, Chase, Citi, Amex, E*Trade, Fidelity, etc.)

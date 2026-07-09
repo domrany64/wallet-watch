@@ -143,7 +143,18 @@ Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card
 |------|-------------|--------|
 | `expense` | Money going out (purchases, bills) | Costco $50, Ziply $75 |
 | `income` | Money coming in (paychecks, refunds) | Paycheck $3,690 |
+| `refund` | Money returned (store returns, cancellations) | Costco return $37.97 |
 | `transfer` | Money between own accounts (auto-skipped) | Citi Card Payment $1,356 |
+
+Refunds display with blue badge and +$ amount, and subtract from spending totals.
+
+### Auto-Categorization
+
+Transactions are auto-categorized by matching description text against patterns:
+1. **User custom mappings** (stored in Firebase `settings.categoryMappings`) — checked first
+2. **Built-in defaults** (100+ patterns) — Costco Gas = transport, Trader Joe = groceries, etc.
+
+When a user edits a transaction's category in the app, a prompt offers to save the description pattern as a new mapping. The suggested pattern auto-strips store numbers and state codes for broader matching.
 
 ---
 
