@@ -1089,6 +1089,16 @@ window._editTxn = (id) => {
         const oldCategory = t.category || 'other';
         const desc = document.getElementById('etDesc').value.trim();
 
+        // Ask about mapping BEFORE async update (browser blocks prompt in async callbacks)
+        let patternInput = null;
+        if (newCategory !== oldCategory && desc) {
+            const suggestedPattern = desc.replace(/\s*#\d+.*$/, '').replace(/\s+(OR|WA|CA|TX|NY|FL|AZ|CO|WI|NV|CH|IT)\s*$/i, '').trim();
+            patternInput = prompt(
+                `Save mapping so future "${desc}" transactions auto-categorize as "${getCategoryLabel(newCategory)}"?\n\nEdit the pattern to match (shorter = matches more):`,
+                suggestedPattern
+            );
+        }
+
         update(dbRef(`transactions/${id}`), {
             amount: parseFloat(document.getElementById('etAmount').value),
             category: newCategory,
@@ -1101,20 +1111,12 @@ window._editTxn = (id) => {
             hideModal();
             showToast('Transaction updated');
 
-            // Suggest category mapping if changed from other
-            if (newCategory !== oldCategory && desc) {
-                const suggestedPattern = desc.replace(/\s*#\d+.*$/, '').replace(/\s+(OR|WA|CA|TX|NY|FL|AZ|CO|WI|NV|CH|IT)\s*$/i, '').trim();
-                const patternInput = prompt(
-                    `Save mapping so future "${desc}" transactions auto-categorize as "${getCategoryLabel(newCategory)}"?\n\nEdit the pattern to match (shorter = matches more):`,
-                    suggestedPattern
-                );
-                if (patternInput && patternInput.trim()) {
-                    const mappings = data.settings?.categoryMappings || {};
-                    mappings[patternInput.trim()] = newCategory;
-                    update(dbRef('settings'), { categoryMappings: mappings }).then(() => {
-                        showToast(`Mapping saved: "${patternInput.trim()}" = ${getCategoryLabel(newCategory)}`);
-                    });
-                }
+            if (patternInput && patternInput.trim()) {
+                const mappings = data.settings?.categoryMappings || {};
+                mappings[patternInput.trim()] = newCategory;
+                update(dbRef('settings'), { categoryMappings: mappings }).then(() => {
+                    showToast(`Mapping saved: "${patternInput.trim()}" = ${getCategoryLabel(newCategory)}`);
+                });
             }
         });
     });
