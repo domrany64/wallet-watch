@@ -409,6 +409,19 @@ body {
     transition: background 0.2s;
 }
 
+.txn-item.txn-refund {
+    border-left: 3px solid var(--info);
+}
+
+.txn-amount-refund {
+    color: var(--info) !important;
+}
+
+.txn-type-badge.refund {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--info);
+}
+
 .txn-item:hover {
     background: var(--surface-hover);
 }

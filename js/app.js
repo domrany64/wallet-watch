@@ -305,9 +305,12 @@ function getActiveRecurringTotal() {
 }
 
 function getMonthSpending() {
-    return getMonthTransactions()
-        .filter(t => t.txnType !== 'income')
+    const txns = getMonthTransactions();
+    const expenses = txns.filter(t => t.txnType === 'expense' || (!t.txnType && t.txnType !== 'income' && t.txnType !== 'refund'))
         .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const refunds = txns.filter(t => t.txnType === 'refund')
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    return expenses - refunds;
 }
 
 function getMonthIncome() {
@@ -539,21 +542,23 @@ function renderDashboard() {
         return;
     }
 
-    // Per-spender breakdown (expenses only)
+    // Per-spender breakdown (expenses minus refunds)
     const expenseTxns = txns.filter(t => t.txnType !== 'income');
     const spenderTotals = {};
     getSpenders().forEach(s => spenderTotals[s] = 0);
     expenseTxns.forEach(t => {
         if (t.spender && spenderTotals[t.spender] !== undefined) {
-            spenderTotals[t.spender] += Number(t.amount || 0);
+            const sign = t.txnType === 'refund' ? -1 : 1;
+            spenderTotals[t.spender] += sign * Number(t.amount || 0);
         }
     });
 
-    // Per-category breakdown (expenses only)
+    // Per-category breakdown (expenses minus refunds)
     const catTotals = {};
     expenseTxns.forEach(t => {
         const cat = t.category || 'other';
-        catTotals[cat] = (catTotals[cat] || 0) + Number(t.amount || 0);
+        const sign = t.txnType === 'refund' ? -1 : 1;
+        catTotals[cat] = (catTotals[cat] || 0) + sign * Number(t.amount || 0);
     });
     const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
     const maxCat = catSorted.length > 0 ? catSorted[0][1] : 1;
@@ -692,11 +697,16 @@ function renderDashboard() {
 
 function txnItemHtml(t) {
     const isIncome = t.txnType === 'income';
+    const isRefund = t.txnType === 'refund';
+    const badgeHtml = isIncome ? ' <span class="txn-type-badge income">INCOME</span>'
+        : isRefund ? ' <span class="txn-type-badge refund">REFUND</span>' : '';
+    const amountClass = isIncome ? 'txn-amount-income' : isRefund ? 'txn-amount-refund' : '';
+    const sign = isIncome || isRefund ? '+' : '-';
     return `
-        <div class="txn-item ${isIncome ? 'txn-income' : ''}">
+        <div class="txn-item ${isIncome ? 'txn-income' : ''} ${isRefund ? 'txn-refund' : ''}">
             <div class="txn-icon">${getCategoryIcon(t.category)}</div>
             <div class="txn-details">
-                <div class="txn-desc">${escapeHtml(t.description || getCategoryLabel(t.category))}${isIncome ? ' <span class="txn-type-badge income">INCOME</span>' : ''}</div>
+                <div class="txn-desc">${escapeHtml(t.description || getCategoryLabel(t.category))}${badgeHtml}</div>
                 <div class="txn-meta">
                     <span>${getCategoryLabel(t.category)}</span>
                     <span>•</span>
@@ -707,7 +717,7 @@ function txnItemHtml(t) {
                     <span>${t.date || ''}</span>
                 </div>
             </div>
-            <div class="txn-amount ${isIncome ? 'txn-amount-income' : ''}">${isIncome ? '+' : '-'}${fmt(t.amount)}</div>
+            <div class="txn-amount ${amountClass}">${sign}${fmt(t.amount)}</div>
             <div class="txn-actions">
                 <button class="btn-icon" onclick="window._editTxn('${t.id}')" title="Edit">✏️</button>
                 <button class="btn-icon" onclick="window._deleteTxn('${t.id}')" title="Delete">🗑️</button>

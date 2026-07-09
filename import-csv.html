@@ -598,7 +598,11 @@
                         txnType = 'expense';
                     } else if (!isNaN(credit) && credit !== 0) {
                         amount = Math.abs(credit);
-                        txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
+                        if (paymentPatterns.test(descLower)) {
+                            txnType = 'transfer';
+                        } else {
+                            txnType = 'refund';
+                        }
                     } else {
                         skipped++;
                         continue;
@@ -659,24 +663,29 @@
 
             // Show stats
             const expenses = parsedTransactions.filter(t => t.txnType === 'expense');
+            const refunds = parsedTransactions.filter(t => t.txnType === 'refund');
             const incomes = parsedTransactions.filter(t => t.txnType === 'income');
             const totalExpense = expenses.reduce((s, t) => s + t.amount, 0);
+            const totalRefund = refunds.reduce((s, t) => s + t.amount, 0);
             const totalIncome = incomes.reduce((s, t) => s + t.amount, 0);
             document.getElementById('stats').innerHTML = `
                 <div class="stat"><div class="stat-num">${parsedTransactions.length}</div><div class="stat-label">Transactions</div></div>
                 <div class="stat"><div class="stat-num">${expenses.length}</div><div class="stat-label">Expenses</div></div>
                 <div class="stat"><div class="stat-num" style="color:#ef4444">$${totalExpense.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total Spent</div></div>
-                <div class="stat"><div class="stat-num">${incomes.length}</div><div class="stat-label">Income</div></div>
-                <div class="stat"><div class="stat-num" style="color:#10b981">$${totalIncome.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total Income</div></div>
+                ${refunds.length > 0 ? `<div class="stat"><div class="stat-num" style="color:#3b82f6">${refunds.length}</div><div class="stat-label">Refunds</div></div>
+                <div class="stat"><div class="stat-num" style="color:#3b82f6">-$${totalRefund.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Total Refunds</div></div>` : ''}
+                ${incomes.length > 0 ? `<div class="stat"><div class="stat-num" style="color:#10b981">$${totalIncome.toLocaleString('en-US', {minimumFractionDigits: 2})}</div><div class="stat-label">Income</div></div>` : ''}
                 <div class="stat"><div class="stat-num">${skipped}</div><div class="stat-label">Skipped</div></div>
             `;
 
             const body = document.getElementById('parsedBody');
             body.innerHTML = parsedTransactions.map(t => {
                 const isIncome = t.txnType === 'income';
-                const color = isIncome ? 'color:#10b981' : 'color:#ef4444';
-                const sign = isIncome ? '+' : '-';
-                const badge = isIncome ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.7rem;font-weight:600">INCOME</span>' : '';
+                const isRefund = t.txnType === 'refund';
+                const color = isRefund ? 'color:#3b82f6' : isIncome ? 'color:#10b981' : 'color:#ef4444';
+                const sign = isRefund ? '+' : isIncome ? '+' : '-';
+                const badge = isIncome ? '<span style="background:rgba(16,185,129,0.15);color:#10b981;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.7rem;font-weight:600">INCOME</span>'
+                    : isRefund ? '<span style="background:rgba(59,130,246,0.15);color:#3b82f6;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.7rem;font-weight:600">REFUND</span>' : '';
                 return `<tr>
                     <td>${t.date}</td>
                     <td>${t.description} ${badge}</td>
