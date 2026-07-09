@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-categorize Transactions → WalletWatch</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+        h1 { margin-bottom: 0.5rem; }
+        .subtitle { color: #94a3b8; margin-bottom: 2rem; }
+        a { color: #10b981; }
+        button { padding: 0.6rem 1.5rem; border: none; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; font-family: inherit; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: #334155; color: #e2e8f0; }
+        .btn-danger { background: #ef4444; color: white; }
+        .stats { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .stat { background: #1e293b; padding: 1rem 1.5rem; border-radius: 8px; }
+        .stat-num { font-size: 1.5rem; font-weight: 700; color: #10b981; }
+        .stat-label { font-size: 0.8rem; color: #94a3b8; }
+        .progress-bar { width: 100%; height: 8px; background: #1e293b; border-radius: 4px; margin-bottom: 1rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: #10b981; border-radius: 4px; transition: width 0.3s; width: 0%; }
+        #log { background: #1e293b; border-radius: 8px; padding: 1rem; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; line-height: 1.6; }
+        .log-change { color: #f59e0b; }
+        .log-skip { color: #64748b; }
+        .log-info { color: #94a3b8; }
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 1.5rem; }
+        .preview-table th, .preview-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #334155; text-align: left; }
+        .preview-table th { color: #94a3b8; font-weight: 600; }
+        .preview-table tr:hover { background: #1e293b; }
+        .old-cat { color: #ef4444; text-decoration: line-through; }
+        .new-cat { color: #10b981; font-weight: 600; }
+        .section { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section-title { font-weight: 600; margin-bottom: 1rem; color: #10b981; }
+        .controls { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .login-bar { background: #1e293b; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .login-bar input { padding: 0.4rem 0.6rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 0.85rem; }
+        .login-bar .status { font-size: 0.85rem; color: #94a3b8; }
+        label.check { display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-size: 0.85rem; cursor: pointer; }
+        input[type="checkbox"] { accent-color: #10b981; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Re-categorize Transactions</h1>
+    <p class="subtitle">Re-evaluate all transactions against current category mappings. Shows what would change. <a href="index.html">← Back</a></p>
+
+    <div class="login-bar" id="loginBar">
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="btn-primary" id="loginBtn" style="padding: 0.4rem 1rem">Login</button>
+        <span class="status" id="loginStatus">Checking auth...</span>
+    </div>
+
+    <div class="section">
+        <div class="section-title">How it works</div>
+        <p style="font-size:0.85rem;color:#94a3b8;line-height:1.6">
+            1. Click <strong>Scan</strong> to check all transactions against your current mappings (built-in + custom from Firebase).<br>
+            2. Preview shows transactions whose category would change.<br>
+            3. Click <strong>Apply All</strong> to update them, or deselect ones you want to keep as-is.
+        </p>
+    </div>
+
+    <div class="controls">
+        <button class="btn-primary" id="scanBtn" disabled>Scan All Transactions</button>
+        <label class="check"><input type="checkbox" id="onlyOther" checked> Only re-categorize "Other"</label>
+        <span id="statusText" style="color:#94a3b8;font-size:0.85rem"></span>
+    </div>
+
+    <div id="results" style="display:none">
+        <div class="stats" id="stats"></div>
+        <div style="max-height:500px;overflow-y:auto;margin-bottom:1.5rem">
+            <table class="preview-table" id="previewTable">
+                <thead><tr><th><input type="checkbox" id="selectAll" checked></th><th>Date</th><th>Description</th><th>Current</th><th>New</th></tr></thead>
+                <tbody id="previewBody"></tbody>
+            </table>
+        </div>
+        <div class="controls">
+            <button class="btn-primary" id="applyBtn" disabled>Apply Selected Changes</button>
+            <button class="btn-secondary" id="clearBtn">Clear</button>
+            <span id="applyStatus" style="color:#94a3b8;font-size:0.85rem"></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div id="log"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyQ6QQQ0Jb3DHT-zzYxbBJ8mJ12yxjt48",
+            authDomain: "wallet-watch-247f2.firebaseapp.com",
+            databaseURL: "https://wallet-watch-247f2-default-rtdb.firebaseio.com",
+            projectId: "wallet-watch-247f2",
+            storageBucket: "wallet-watch-247f2.firebasestorage.app",
+            messagingSenderId: "647540254739",
+            appId: "1:647540254739:web:feeb3a44b81d7e3597f7e6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        let currentUser = null;
+        let userData = {};
+        let changes = [];
+
+        const CATEGORIES = {
+            housing: '🏠 Housing', utilities: '💡 Utilities', groceries: '🛒 Groceries',
+            dining: '🍽️ Dining Out', transport: '🚗 Transportation', healthcare: '🏥 Healthcare',
+            entertainment: '🎭 Entertainment', shopping: '🛍️ Shopping', personal: '💇 Personal Care',
+            education: '📚 Education', subscriptions: '📱 Subscriptions', savings: '🏦 Savings',
+            investments: '📈 Investments', insurance: '🛡️ Insurance', gifts: '🎁 Gifts',
+            travel: '✈️ Travel', childcare: '👶 Childcare', pets: '🐾 Pets', other: '📦 Other'
+        };
+
+        // Same grouped mappings as main app
+        const CATEGORY_MAPPINGS_GROUPED = {
+            transport: [
+                'COSTCO GAS', 'ARCO', '76 -', 'SPEEDWAY', 'SHELL', 'CHEVRON',
+                'PARKING', 'PDX AIRPORT', 'SEA AIRPORT', 'KAADY CAR WASH', 'UBER', 'LYFT', 'RTC'
+            ],
+            groceries: [
+                'COSTCO WHSE', 'WWW COSTCO COM', 'TRADER JOE', 'SAFEWAY', 'QFC',
+                'FRED-MEYER', 'WINCO', 'GROCERY OUTLET', 'WHOLEFDS', 'WHOLE FOODS',
+                'MARKET OF CHOICE', 'BAZAAR WORLD FOOD', 'BAZAAR FOOD MARKET',
+                'FRESH HALAL MEAT', 'ARIANA FOOD MARKET', 'ROSE INTERNATIONAL',
+                'UNIQUE INTERNATIONAL MAR', 'PERSIA FOODS', 'CHEFSTORE', 'BARBUR WORLD FOODS'
+            ],
+            dining: [
+                'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
+                'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS',
+                'TST*', 'GYRO', 'CORNER BAKERY', 'CHENNAI MASALA', 'NONNA EMILIA',
+                'CHINESE GOURMET', 'SWEET SATISFACTION', 'SIZZLE PIE', '85C BAKERY',
+                'BASKIN', 'LIFE CAFE', 'PIZZA', 'RESTAURANT', 'RISTORANTE',
+                'GRILL', 'BAKERY', 'GELATERIA', 'BUFFET', 'DONUTS'
+            ],
+            shopping: [
+                'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS',
+                'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS',
+                'NORDSTROM', 'GAP US', 'H&M', 'CLAIRE', 'DOLLAR TREE',
+                'BATH AND BODY', 'SEPHORA', 'ULTA', 'NIKE.COM', 'UPS STORE', 'FEDEX'
+            ],
+            personal: ['SHISEIDO', 'DERMSTORE'],
+            housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'MR.COOPER', 'SPRINGVILLE TOWNHO'],
+            healthcare: ['KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX', 'KP WESTSIDE RX', 'WALGREENS', 'CVS/PHARMACY', 'PHARMACY'],
+            travel: ['QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA', 'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'NOVOTEL'],
+            education: ['SCHOLASTIC', 'PCC ROCK CREEK', 'BEAVERTON SD'],
+            entertainment: ['MYSTERY SPOT', 'TECH INTERACTIVE', 'SANTA CRUZ BEACH', 'SKY ZONE', 'SUPERPLAY', 'TUALATIN HILLS PARK', 'YOSEMITE', '24 HOUR FITNESS'],
+            subscriptions: ['NETFLIX', 'SPOTIFY', 'HULU', 'DISNEY', 'AMAZON PRIME', 'APPLE.COM', 'ANCESTRY.COM'],
+            utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY', 'WASTE MANAGEMENT'],
+            insurance: ['INSURANCE'],
+            childcare: ['BEAVERTON SD'],
+        };
+
+        const DEFAULT_MAPPINGS = {};
+        for (const [category, patterns] of Object.entries(CATEGORY_MAPPINGS_GROUPED)) {
+            for (const pattern of patterns) DEFAULT_MAPPINGS[pattern] = category;
+        }
+
+        function matchCategory(description) {
+            if (!description) return null;
+            const upper = description.toUpperCase().trim();
+            const userMappings = userData.settings?.categoryMappings || {};
+            for (const [pattern, category] of Object.entries(userMappings)) {
+                if (upper.includes(pattern.toUpperCase())) return category;
+            }
+            for (const [pattern, category] of Object.entries(DEFAULT_MAPPINGS)) {
+                if (upper.includes(pattern.toUpperCase())) return category;
+            }
+            return null;
+        }
+
+        // Auth
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const loginBar = document.getElementById('loginBar');
+            if (user) {
+                loginBar.style.display = 'none';
+                const snap = await get(ref(db, `households/${user.uid}`));
+                userData = snap.val() || {};
+                document.getElementById('scanBtn').disabled = false;
+            } else {
+                loginBar.style.display = '';
+                document.getElementById('loginStatus').textContent = 'Login required';
+            }
+        });
+
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const email = document.getElementById('loginEmail').value;
+            const pw = document.getElementById('loginPassword').value;
+            signInWithEmailAndPassword(auth, email, pw).catch(() => {
+                document.getElementById('loginStatus').textContent = 'Login failed';
+            });
+        });
+
+        // Scan
+        document.getElementById('scanBtn').addEventListener('click', () => {
+            const transactions = userData.transactions || {};
+            const onlyOther = document.getElementById('onlyOther').checked;
+            changes = [];
+
+            for (const [id, t] of Object.entries(transactions)) {
+                const currentCat = t.category || 'other';
+                if (onlyOther && currentCat !== 'other') continue;
+
+                const newCat = matchCategory(t.description);
+                if (newCat && newCat !== currentCat) {
+                    changes.push({ id, description: t.description, date: t.date, currentCat, newCat, selected: true });
+                }
+            }
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat"><div class="stat-num">${Object.keys(transactions).length}</div><div class="stat-label">Total Transactions</div></div>
+                <div class="stat"><div class="stat-num" style="color:#f59e0b">${changes.length}</div><div class="stat-label">Would Change</div></div>
+            `;
+
+            const body = document.getElementById('previewBody');
+            body.innerHTML = changes.map((c, i) => `
+                <tr>
+                    <td><input type="checkbox" class="change-check" data-idx="${i}" checked></td>
+                    <td>${c.date || ''}</td>
+                    <td>${c.description || ''}</td>
+                    <td class="old-cat">${CATEGORIES[c.currentCat] || c.currentCat}</td>
+                    <td class="new-cat">${CATEGORIES[c.newCat] || c.newCat}</td>
+                </tr>
+            `).join('');
+
+            if (changes.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:2rem">No changes found. All transactions match current mappings.</td></tr>';
+            }
+
+            document.getElementById('results').style.display = '';
+            document.getElementById('applyBtn').disabled = changes.length === 0;
+            document.getElementById('statusText').textContent = `Scanned ${Object.keys(transactions).length} transactions`;
+        });
+
+        // Select all toggle
+        document.getElementById('selectAll').addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            document.querySelectorAll('.change-check').forEach(cb => {
+                cb.checked = checked;
+                changes[cb.dataset.idx].selected = checked;
+            });
+        });
+
+        document.getElementById('previewBody').addEventListener('change', (e) => {
+            if (e.target.classList.contains('change-check')) {
+                changes[e.target.dataset.idx].selected = e.target.checked;
+            }
+        });
+
+        // Apply
+        document.getElementById('applyBtn').addEventListener('click', async () => {
+            const selected = changes.filter(c => c.selected);
+            if (selected.length === 0) return;
+            if (!confirm(`Update category for ${selected.length} transactions?`)) return;
+
+            const btn = document.getElementById('applyBtn');
+            btn.disabled = true;
+            const log = document.getElementById('log');
+            const progressFill = document.getElementById('progressFill');
+            const statusEl = document.getElementById('applyStatus');
+            log.innerHTML = '';
+
+            const updates = {};
+            selected.forEach(c => {
+                updates[`households/${currentUser.uid}/transactions/${c.id}/category`] = c.newCat;
+            });
+
+            try {
+                await update(ref(db), updates);
+                log.innerHTML = `<div class="log-info">✓ Updated ${selected.length} transactions</div>`;
+                statusEl.textContent = `Done! ${selected.length} updated`;
+                progressFill.style.width = '100%';
+                // Refresh local data
+                const snap = await get(ref(db, `households/${currentUser.uid}`));
+                userData = snap.val() || {};
+            } catch (err) {
+                log.innerHTML = `<div style="color:#ef4444">Error: ${err.message}</div>`;
+            }
+        });
+
+        // Clear
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            changes = [];
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('progressFill').style.width = '0%';
+        });
+    </script>
+</body>
+</html>
