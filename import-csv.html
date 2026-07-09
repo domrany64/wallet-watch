@@ -322,25 +322,25 @@
             chase_credit: {
                 // Transaction Date,Post Date,Description,Category,Type,Amount,Memo
                 date: 'Transaction Date', desc: 'Description', amount: 'Amount', category: 'Category',
-                amountNegIsExpense: true
+                amountNegIsExpense: true, creditCard: true
             },
             citi: {
                 // Status,Date,Description,Debit,Credit,Member Name
-                date: 'Date', desc: 'Description', debit: 'Debit', credit: 'Credit'
+                date: 'Date', desc: 'Description', debit: 'Debit', credit: 'Credit', creditCard: true
             },
             amex: {
                 date: 'Date', desc: 'Description', amount: 'Amount',
-                amountNegIsExpense: false // Amex: positive = charge
+                amountNegIsExpense: false, creditCard: true
             },
             gap: {
                 // 4 junk lines, then: Transaction Date,Description,Category,Amount,Card Last 4 Digits,Purchased by
                 date: 'Transaction Date', desc: 'Description', amount: 'Amount', category: 'Category',
-                amountNegIsExpense: false // positive = charge
+                amountNegIsExpense: false, creditCard: true
             },
             nordstrom: {
                 // ...Counter party name,Currency,Amount,Credit/debit indicator,Book date,...Description,Category,...
                 date: 'Book date', desc: 'Description', amount: 'Amount',
-                creditDebitCol: 'Credit/debit indicator', category: 'Category'
+                creditDebitCol: 'Credit/debit indicator', category: 'Category', creditCard: true
             },
             keybank: {
                 // 2 junk lines, then: Date,Amount,Description,Ref.#
@@ -642,6 +642,8 @@
                             // Positive = inflow — but check if it's a payment to card first
                             if (paymentPatterns.test(descLower) || transferPatterns.test(descLower)) {
                                 txnType = 'transfer';
+                            } else if (preset.creditCard) {
+                                txnType = 'refund';
                             } else {
                                 txnType = 'income';
                             }
@@ -651,7 +653,13 @@
                         if (amount > 0) {
                             txnType = 'expense';
                         } else {
-                            txnType = paymentPatterns.test(descLower) ? 'transfer' : 'income';
+                            if (paymentPatterns.test(descLower) || transferPatterns.test(descLower)) {
+                                txnType = 'transfer';
+                            } else if (preset.creditCard) {
+                                txnType = 'refund';
+                            } else {
+                                txnType = 'income';
+                            }
                         }
                     }
                     amount = Math.abs(amount);

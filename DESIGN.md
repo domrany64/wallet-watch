@@ -142,11 +142,13 @@ Subtitle shows e.g. "2 of 3 paid • 1 late". Clicking the "Still Expected" card
 | Type | Description | Example |
 |------|-------------|--------|
 | `expense` | Money going out (purchases, bills) | Costco $50, Ziply $75 |
-| `income` | Money coming in (paychecks, refunds) | Paycheck $3,690 |
+| `income` | Money coming in (paychecks, interest) | Paycheck $3,690 |
 | `refund` | Money returned (store returns, cancellations) | Costco return $37.97 |
 | `transfer` | Money between own accounts (auto-skipped) | Citi Card Payment $1,356 |
 
 Refunds display with blue badge and +$ amount, and subtract from spending totals.
+
+Credit card presets (Chase, Citi, Amex, Gap, Nordstrom) have `creditCard: true` flag. On credit cards, positive non-payment amounts are always classified as `refund`, never `income` (credit cards have no income).
 
 ### Auto-Categorization
 
