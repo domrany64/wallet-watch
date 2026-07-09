@@ -94,6 +94,178 @@ const CATEGORIES = {
     other: { icon: '📦', label: 'Other' }
 };
 
+// ===== Description-to-Category Mapping =====
+// Built-in defaults. User overrides stored in Firebase settings.categoryMappings
+const DEFAULT_CATEGORY_MAPPINGS = {
+    // Gas/Fuel
+    'COSTCO GAS': 'transport',
+    'ARCO': 'transport',
+    '76 -': 'transport',
+    'SPEEDWAY': 'transport',
+    'SHELL': 'transport',
+    'CHEVRON': 'transport',
+    'DUTCH BROS': 'dining',
+    // Groceries
+    'COSTCO WHSE': 'groceries',
+    'WWW COSTCO COM': 'groceries',
+    'TRADER JOE': 'groceries',
+    'SAFEWAY': 'groceries',
+    'QFC': 'groceries',
+    'FRED-MEYER': 'groceries',
+    'WINCO': 'groceries',
+    'GROCERY OUTLET': 'groceries',
+    'WHOLEFDS': 'groceries',
+    'WHOLE FOODS': 'groceries',
+    'MARKET OF CHOICE': 'groceries',
+    'BAZAAR WORLD FOOD': 'groceries',
+    'BAZAAR FOOD MARKET': 'groceries',
+    'FRESH HALAL MEAT': 'groceries',
+    'ARIANA FOOD MARKET': 'groceries',
+    'ROSE INTERNATIONAL': 'groceries',
+    'UNIQUE INTERNATIONAL MAR': 'groceries',
+    'PERSIA FOODS': 'groceries',
+    'CHEFSTORE': 'groceries',
+    'BARBUR WORLD FOODS': 'groceries',
+    'TARGET': 'shopping',
+    'TARGET.COM': 'shopping',
+    // Dining
+    'MCDONALD': 'dining',
+    'SUBWAY': 'dining',
+    'PANDA EXPRESS': 'dining',
+    'IN-N-OUT': 'dining',
+    'JIMMY JOHN': 'dining',
+    'CHIPOTLE': 'dining',
+    'STARBUCKS': 'dining',
+    'PEETS': 'dining',
+    'SHAKE SHACK': 'dining',
+    'TST*': 'dining',
+    'SQ *': 'dining',
+    'GYRO': 'dining',
+    'CORNER BAKERY': 'dining',
+    'CHENNAI MASALA': 'dining',
+    'NONNA EMILIA': 'dining',
+    'CHINESE GOURMET': 'dining',
+    'SWEET SATISFACTION': 'dining',
+    'SIZZLE PIE': 'dining',
+    '85C BAKERY': 'dining',
+    'BASKIN': 'dining',
+    'LIFE CAFE': 'dining',
+    'CAFE': 'dining',
+    'PIZZA': 'dining',
+    'RESTAURANT': 'dining',
+    'RISTORANTE': 'dining',
+    'GRILL': 'dining',
+    'BAKERY': 'dining',
+    'GELATERIA': 'dining',
+    'BUFFET': 'dining',
+    // Shopping
+    'AMAZON': 'shopping',
+    'MARSHALLS': 'shopping',
+    'HOMEGOODS': 'shopping',
+    'GOODWILL': 'shopping',
+    'ROSS STORES': 'shopping',
+    'BURLINGTON': 'shopping',
+    'JCPENNEY': 'shopping',
+    'MACYS': 'shopping',
+    'NORDSTROM': 'shopping',
+    'GAP US': 'shopping',
+    'H&M': 'shopping',
+    'CLAIRE': 'shopping',
+    'DOLLAR TREE': 'shopping',
+    'BATH AND BODY': 'shopping',
+    'SEPHORA': 'shopping',
+    'ULTA': 'shopping',
+    'NIKE.COM': 'shopping',
+    'SHISEIDO': 'personal',
+    'DERMSTORE': 'personal',
+    // Home
+    'HOME DEPOT': 'housing',
+    'RODDA PAINT': 'housing',
+    // Healthcare
+    'KP NW DENTAL': 'healthcare',
+    'KP DENTAL': 'healthcare',
+    'KAISER DENTAL': 'healthcare',
+    'KP NW RX': 'healthcare',
+    'KP WESTSIDE RX': 'healthcare',
+    'WALGREENS': 'healthcare',
+    'CVS/PHARMACY': 'healthcare',
+    'PHARMACY': 'healthcare',
+    // Transport
+    'PARKING': 'transport',
+    'PDX AIRPORT': 'transport',
+    'SEA AIRPORT': 'transport',
+    'KAADY CAR WASH': 'transport',
+    'UBER': 'transport',
+    'LYFT': 'transport',
+    // Travel
+    'QATAR AIR': 'travel',
+    'SOUTHWES': 'travel',
+    'TURKISH AIR': 'travel',
+    'OVAGO AIR': 'travel',
+    'EXPEDIA': 'travel',
+    'HOTEL': 'travel',
+    'GREAT WOLF': 'travel',
+    'RITZ CARLTON': 'travel',
+    'TRENITALIA': 'travel',
+    'NOVOTEL': 'travel',
+    // Education
+    'SCHOLASTIC': 'education',
+    'PCC ROCK CREEK': 'education',
+    'BEAVERTON SD': 'education',
+    // Entertainment
+    'MYSTERY SPOT': 'entertainment',
+    'TECH INTERACTIVE': 'entertainment',
+    'SANTA CRUZ BEACH': 'entertainment',
+    'SKY ZONE': 'entertainment',
+    'SUPERPLAY': 'entertainment',
+    'TUALATIN HILLS PARK': 'entertainment',
+    'YOSEMITE': 'entertainment',
+    '24 HOUR FITNESS': 'entertainment',
+    // Subscriptions
+    'NETFLIX': 'subscriptions',
+    'SPOTIFY': 'subscriptions',
+    'HULU': 'subscriptions',
+    'DISNEY': 'subscriptions',
+    'AMAZON PRIME': 'subscriptions',
+    'APPLE.COM': 'subscriptions',
+    'ANCESTRY.COM': 'subscriptions',
+    // Utilities
+    'ZIPLY FIBER': 'utilities',
+    'PORTLAND GENERAL': 'utilities',
+    'NORTHWEST NATURA': 'utilities',
+    'TUALATIN VALLEY': 'utilities',
+    'WASTE MANAGEMENT': 'utilities',
+    // Housing
+    'ROCKET MORTGAGE': 'housing',
+    'MR.COOPER': 'housing',
+    'SPRINGVILLE TOWNHO': 'housing',
+    // Insurance
+    'INSURANCE': 'insurance',
+    // Shipping
+    'UPS STORE': 'shopping',
+    'FEDEX': 'shopping',
+    // Childcare
+    'BEAVERTON SD': 'childcare',
+};
+
+function matchDescriptionCategory(description) {
+    if (!description) return null;
+    const upper = description.toUpperCase().trim();
+
+    // Check user custom mappings first (from Firebase)
+    const userMappings = data.settings?.categoryMappings || {};
+    for (const [pattern, category] of Object.entries(userMappings)) {
+        if (upper.includes(pattern.toUpperCase())) return category;
+    }
+
+    // Check built-in defaults
+    for (const [pattern, category] of Object.entries(DEFAULT_CATEGORY_MAPPINGS)) {
+        if (upper.includes(pattern.toUpperCase())) return category;
+    }
+
+    return null;
+}
+
 const RECURRING_TYPES = {
     income: { icon: '💰', label: 'Income' },
     bill: { icon: '📄', label: 'Bills' },
@@ -913,10 +1085,14 @@ window._editTxn = (id) => {
         e.preventDefault();
         const date = document.getElementById('etDate').value;
         const [y, m] = date.split('-');
+        const newCategory = document.getElementById('etCategory').value;
+        const oldCategory = t.category || 'other';
+        const desc = document.getElementById('etDesc').value.trim();
+
         update(dbRef(`transactions/${id}`), {
             amount: parseFloat(document.getElementById('etAmount').value),
-            category: document.getElementById('etCategory').value,
-            description: document.getElementById('etDesc').value.trim(),
+            category: newCategory,
+            description: desc,
             cardId: document.getElementById('etCard').value,
             spender: document.getElementById('etSpender').value,
             date,
@@ -924,6 +1100,22 @@ window._editTxn = (id) => {
         }).then(() => {
             hideModal();
             showToast('Transaction updated');
+
+            // Suggest category mapping if changed from other
+            if (newCategory !== oldCategory && desc) {
+                const suggestedPattern = desc.replace(/\s*#\d+.*$/, '').replace(/\s+(OR|WA|CA|TX|NY|FL|AZ|CO|WI|NV|CH|IT)\s*$/i, '').trim();
+                const patternInput = prompt(
+                    `Save mapping so future "${desc}" transactions auto-categorize as "${getCategoryLabel(newCategory)}"?\n\nEdit the pattern to match (shorter = matches more):`,
+                    suggestedPattern
+                );
+                if (patternInput && patternInput.trim()) {
+                    const mappings = data.settings?.categoryMappings || {};
+                    mappings[patternInput.trim()] = newCategory;
+                    update(dbRef('settings'), { categoryMappings: mappings }).then(() => {
+                        showToast(`Mapping saved: "${patternInput.trim()}" = ${getCategoryLabel(newCategory)}`);
+                    });
+                }
+            }
         });
     });
 };

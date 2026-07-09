@@ -254,6 +254,52 @@
             return null;
         }
 
+        // Description-based category matching (same as main app)
+        const DESC_CATEGORY_DEFAULTS = {
+            'COSTCO GAS': 'transport', 'ARCO': 'transport', '76 -': 'transport', 'SPEEDWAY': 'transport', 'SHELL': 'transport', 'CHEVRON': 'transport',
+            'COSTCO WHSE': 'groceries', 'WWW COSTCO COM': 'groceries', 'TRADER JOE': 'groceries', 'SAFEWAY': 'groceries', 'QFC': 'groceries',
+            'FRED-MEYER': 'groceries', 'WINCO': 'groceries', 'GROCERY OUTLET': 'groceries', 'WHOLEFDS': 'groceries', 'WHOLE FOODS': 'groceries',
+            'MARKET OF CHOICE': 'groceries', 'BAZAAR WORLD FOOD': 'groceries', 'BAZAAR FOOD MARKET': 'groceries', 'FRESH HALAL MEAT': 'groceries',
+            'ARIANA FOOD MARKET': 'groceries', 'ROSE INTERNATIONAL': 'groceries', 'UNIQUE INTERNATIONAL MAR': 'groceries',
+            'PERSIA FOODS': 'groceries', 'CHEFSTORE': 'groceries', 'BARBUR WORLD FOODS': 'groceries',
+            'TARGET': 'shopping', 'TARGET.COM': 'shopping',
+            'MCDONALD': 'dining', 'SUBWAY': 'dining', 'PANDA EXPRESS': 'dining', 'IN-N-OUT': 'dining', 'JIMMY JOHN': 'dining',
+            'CHIPOTLE': 'dining', 'STARBUCKS': 'dining', 'PEETS': 'dining', 'SHAKE SHACK': 'dining', 'DUTCH BROS': 'dining',
+            'TST*': 'dining', 'SQ *': 'dining', 'GYRO': 'dining', 'CORNER BAKERY': 'dining', 'CHENNAI MASALA': 'dining',
+            'CHINESE GOURMET': 'dining', 'CAFE': 'dining', 'PIZZA': 'dining', 'RESTAURANT': 'dining', 'BAKERY': 'dining', 'GELATERIA': 'dining',
+            'AMAZON': 'shopping', 'MARSHALLS': 'shopping', 'HOMEGOODS': 'shopping', 'GOODWILL': 'shopping', 'ROSS STORES': 'shopping',
+            'BURLINGTON': 'shopping', 'JCPENNEY': 'shopping', 'MACYS': 'shopping', 'NORDSTROM': 'shopping', 'GAP US': 'shopping',
+            'H&M': 'shopping', 'CLAIRE': 'shopping', 'DOLLAR TREE': 'shopping', 'BATH AND BODY': 'shopping', 'SEPHORA': 'shopping', 'ULTA': 'shopping',
+            'HOME DEPOT': 'housing', 'RODDA PAINT': 'housing',
+            'KP NW DENTAL': 'healthcare', 'KP DENTAL': 'healthcare', 'KAISER DENTAL': 'healthcare', 'KP NW RX': 'healthcare',
+            'WALGREENS': 'healthcare', 'CVS/PHARMACY': 'healthcare',
+            'PARKING': 'transport', 'PDX AIRPORT': 'transport', 'SEA AIRPORT': 'transport', 'KAADY CAR WASH': 'transport',
+            'QATAR AIR': 'travel', 'SOUTHWES': 'travel', 'TURKISH AIR': 'travel', 'OVAGO AIR': 'travel', 'EXPEDIA': 'travel',
+            'HOTEL': 'travel', 'GREAT WOLF': 'travel', 'RITZ CARLTON': 'travel', 'TRENITALIA': 'travel',
+            'SCHOLASTIC': 'education', 'BEAVERTON SD': 'education',
+            'MYSTERY SPOT': 'entertainment', 'TECH INTERACTIVE': 'entertainment', 'SUPERPLAY': 'entertainment',
+            '24 HOUR FITNESS': 'entertainment', 'SKY ZONE': 'entertainment',
+            'ZIPLY FIBER': 'utilities', 'PORTLAND GENERAL': 'utilities', 'NORTHWEST NATURA': 'utilities',
+            'TUALATIN VALLEY': 'utilities', 'WASTE MANAGEMENT': 'utilities',
+            'ROCKET MORTGAGE': 'housing', 'SPRINGVILLE TOWNHO': 'housing',
+            'UPS STORE': 'shopping', 'FEDEX': 'shopping',
+        };
+
+        function matchDescriptionCategory(description) {
+            if (!description) return null;
+            const upper = description.toUpperCase().trim();
+            // User custom mappings from Firebase
+            const userMappings = (userData.settings?.categoryMappings) || {};
+            for (const [pattern, category] of Object.entries(userMappings)) {
+                if (upper.includes(pattern.toUpperCase())) return category;
+            }
+            // Built-in defaults
+            for (const [pattern, category] of Object.entries(DESC_CATEGORY_DEFAULTS)) {
+                if (upper.includes(pattern.toUpperCase())) return category;
+            }
+            return null;
+        }
+
         // Auth
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
@@ -645,7 +691,7 @@
 
                 const [y, m] = parsedDate.split('-');
                 const bankCat = catCol !== null ? (row[catCol] || '').trim() : null;
-                const category = mapCategory(bankCat) || defaultCat;
+                const category = matchDescriptionCategory(desc) || mapCategory(bankCat) || defaultCat;
 
                 parsedTransactions.push({
                     amount: Math.round(amount * 100) / 100,
