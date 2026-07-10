@@ -94,6 +94,7 @@ const CATEGORIES = {
     insurance: { icon: '🛡️', label: 'Insurance' },
     gifts: { icon: '🎁', label: 'Gifts' },
     travel: { icon: '✈️', label: 'Travel' },
+    camping: { icon: '🔥', label: 'Camping' },
     childcare: { icon: '👶', label: 'Childcare' },
     pets: { icon: '🐾', label: 'Pets' },
     donation: { icon: '🤲', label: 'Donation' },

@@ -57,9 +57,12 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J', 'BERN',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano', 'AIRBNB',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
-        'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV', 'SANTA CLARA',
+        'HENRY COWELL REDW', 'OREGON COAST AQUARIUM',  'SANTA CLARA',
         'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES',
         'Luzern', 'BRIENZ', 'Alpnachstad', 'Menziken', 'Glattbrugg'
+    ],
+    camping: [
+        'RECREATION.GOV', 'MOUNT RAINIER'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
                 'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
