@@ -207,7 +207,7 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 - Month selector
 - Date range mode (toggle checkbox, custom from/to dates)
 - Quick-add form (inline, always visible)
-- Filter bar: by card, spender, category (persistent across month navigation)
+- Filter bar: by card, spender, category, type (expenses/income/refunds), sort (date/amount asc/desc) — all persistent across month navigation
 - Transaction list sorted by date (newest first)
 - Income transactions shown with green +$ and INCOME badge
 - Refund transactions shown with blue +$ and REFUND badge

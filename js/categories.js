@@ -18,7 +18,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     ],
     dining: [
         'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
-        'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS',
+        'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS', 'SOUL KOREAN',
         'GYRO', 'CORNER BAKERY', 'CHENNAI MASALA', 'MIRABELLE BY ORPHEE',
         'CHINESE GOURMET', 'PIZZA', 'RESTAURANT', 'BAKERY', 'GELATERIA',
         'DONUTS', 'Clearwater', 'Hiyaku Buffet', 'NONNA EMILIA', 'PORTLAND ROASTING',
@@ -44,7 +44,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     healthcare: [
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
         'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
-        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE'
+        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN'
     ],
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
@@ -52,10 +52,11 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg',
-        'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV'
+        'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV',
+        'SAN JOSE', 'Santa Cruz'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-                'LEARNNOVIN', 'FARHAD SHARIFI'
+                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE'
     ],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',

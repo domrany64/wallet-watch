@@ -66,7 +66,7 @@ let data = {
 let currentView = 'dashboard';
 let selectedMonth = getCurrentMonth();
 let listeners = [];
-let txnFilters = { card: '', spender: '', category: '' };
+let txnFilters = { card: '', spender: '', category: '', type: '', sort: 'date-desc' };
 let dateRangeMode = false;
 let dateRangeFrom = '';
 let dateRangeTo = '';
@@ -775,6 +775,16 @@ function renderTransactions() {
     if (txnFilters.card) filtered = filtered.filter(t => t.cardId === txnFilters.card);
     if (txnFilters.spender) filtered = filtered.filter(t => t.spender === txnFilters.spender);
     if (txnFilters.category) filtered = filtered.filter(t => t.category === txnFilters.category);
+    if (txnFilters.type) filtered = filtered.filter(t => (t.txnType || 'expense') === txnFilters.type);
+
+    // Apply sort
+    const sort = txnFilters.sort || 'date-desc';
+    filtered.sort((a, b) => {
+        if (sort === 'date-asc') return (a.date || '').localeCompare(b.date || '') || (a.createdAt || 0) - (b.createdAt || 0);
+        if (sort === 'amount-desc') return Number(b.amount || 0) - Number(a.amount || 0);
+        if (sort === 'amount-asc') return Number(a.amount || 0) - Number(b.amount || 0);
+        return (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0);
+    });
 
     const expensesOnly = filtered.filter(t => t.txnType === 'expense' || (!t.txnType && t.txnType !== 'income' && t.txnType !== 'refund')).reduce((s, t) => s + Number(t.amount || 0), 0);
     const refundTotal = filtered.filter(t => t.txnType === 'refund').reduce((s, t) => s + Number(t.amount || 0), 0);
@@ -861,6 +871,18 @@ function renderTransactions() {
                 <option value="">All Categories</option>
                 ${categoryOptions()}
             </select>
+            <select id="filterType" onchange="window._applyTxnFilter()">
+                <option value="">All Types</option>
+                <option value="expense">Expenses only</option>
+                <option value="income">Income only</option>
+                <option value="refund">Refunds only</option>
+            </select>
+            <select id="filterSort" onchange="window._applyTxnFilter()">
+                <option value="date-desc">Date (newest)</option>
+                <option value="date-asc">Date (oldest)</option>
+                <option value="amount-desc">Amount (highest)</option>
+                <option value="amount-asc">Amount (lowest)</option>
+            </select>
         </div>
 
         <div class="txn-list" id="txnList">
@@ -875,6 +897,8 @@ function renderTransactions() {
     if (txnFilters.card) document.getElementById('filterCard').value = txnFilters.card;
     if (txnFilters.spender) document.getElementById('filterSpender').value = txnFilters.spender;
     if (txnFilters.category) document.getElementById('filterCategory').value = txnFilters.category;
+    if (txnFilters.type) document.getElementById('filterType').value = txnFilters.type;
+    if (txnFilters.sort) document.getElementById('filterSort').value = txnFilters.sort;
 }
 
 function handleQuickAdd(e) {
@@ -909,6 +933,8 @@ window._applyTxnFilter = () => {
     txnFilters.card = document.getElementById('filterCard')?.value || '';
     txnFilters.spender = document.getElementById('filterSpender')?.value || '';
     txnFilters.category = document.getElementById('filterCategory')?.value || '';
+    txnFilters.type = document.getElementById('filterType')?.value || '';
+    txnFilters.sort = document.getElementById('filterSort')?.value || 'date-desc';
     renderTransactions();
 };
 
