@@ -30,7 +30,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'PHILLY CHEESE', 'DOMINO\'S', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
         'HOLIDAY MOKA', 'CHURROS', 'Pizzeria', 'IHOP', 'LEVANT', 'COFFEE',
         'CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT', 'BOBADOCHI', 'AUNTIE ANNES',
-        'CHA CHA CHA Taqueria', 'ARTISAN BAKE', 'FOOD'
+        'CHA CHA CHA Taqueria', 'ARTISAN BAKE', 'FOOD', 'Haida Sandwich'
     ],
     shopping: [
         'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS', 'THE CHILDRENS PLACE',
@@ -54,7 +54,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
         'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
         'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J',
-        'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano',
+        'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano', 'AIRBNB',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
         'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV',
         'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES'
