@@ -27,7 +27,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'PHO TANGO', 'GENGIS KHAN', 'Grill', 'BASKIN', 'CHOCOLATE', 'Fast food',
         'BIGTOWNHERO', 'EATALY', 'BRAGANZA TEA', 'BUFFET', 'JAMBA JUICE', 'SIZZLE PIE',
         'PHILLY CHEESE', 'DOMINOS', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
-        'HOLIDAY MOKA', 'CHURROS', 'Pizzeria', 'IHOP',
+        'HOLIDAY MOKA', 'CHURROS', 'Pizzeria', 'IHOP', 'LEVANT',
         'CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT', 'BOBADOCHI'
     ],
     shopping: [
