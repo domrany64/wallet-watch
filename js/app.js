@@ -66,7 +66,7 @@ let data = {
 let currentView = 'dashboard';
 let selectedMonth = getCurrentMonth();
 let listeners = [];
-let txnFilters = { card: '', spender: '', category: '', type: '', sort: 'amount-desc' };
+let txnFilters = { card: '', spender: '', category: '', type: '', sort: 'amount-desc', search: '' };
 let dateRangeMode = false;
 let dateRangeFrom = '';
 let dateRangeTo = '';
@@ -771,6 +771,10 @@ function renderTransactions() {
     if (txnFilters.spender) filtered = filtered.filter(t => t.spender === txnFilters.spender);
     if (txnFilters.category) filtered = filtered.filter(t => t.category === txnFilters.category);
     if (txnFilters.type) filtered = filtered.filter(t => (t.txnType || 'expense') === txnFilters.type);
+    if (txnFilters.search) {
+        const s = txnFilters.search.toUpperCase();
+        filtered = filtered.filter(t => (t.description || '').toUpperCase().includes(s));
+    }
 
     // Apply sort
     const sort = txnFilters.sort || 'date-desc';
@@ -855,6 +859,7 @@ function renderTransactions() {
         </div>` : ''}` : ''}
 
         <div class="filter-bar">
+            <input type="text" id="filterSearch" placeholder="Search description..." value="" onkeyup="window._applyTxnFilter()" style="padding:0.4rem 0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;font-family:var(--font);min-width:160px">
             <select id="filterCard" onchange="window._applyTxnFilter()">
                 <option value="">All Cards</option>
                 ${cardOptions(false)}
@@ -895,6 +900,7 @@ function renderTransactions() {
     if (txnFilters.category) document.getElementById('filterCategory').value = txnFilters.category;
     if (txnFilters.type) document.getElementById('filterType').value = txnFilters.type;
     if (txnFilters.sort) document.getElementById('filterSort').value = txnFilters.sort;
+    if (txnFilters.search) document.getElementById('filterSearch').value = txnFilters.search;
 }
 
 function handleQuickAdd(e) {
@@ -931,6 +937,7 @@ window._applyTxnFilter = () => {
     txnFilters.category = document.getElementById('filterCategory')?.value || '';
     txnFilters.type = document.getElementById('filterType')?.value || '';
     txnFilters.sort = document.getElementById('filterSort')?.value || 'date-desc';
+    txnFilters.search = document.getElementById('filterSearch')?.value || '';
     renderTransactions();
 };
 
