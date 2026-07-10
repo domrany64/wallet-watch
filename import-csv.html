@@ -591,7 +591,7 @@
             let skipped = 0;
 
             // Patterns for auto-classifying transaction types
-            const transferPatterns = /citi card|chase credit|barclaycard|amex epayment|onpoint ccu|funds tran|credit crd|internet trf|real time payment|rtp rec|rtp-|paypal transfer/i;
+            const transferPatterns = /citi card|chase credit|barclaycard|amex epayment|onpoint ccu|funds tran|credit crd|internet trf|real time payment|rtp rec|rtp-|paypal transfer|upgrade crb|upgrade.*transfer/i;
             const paymentPatterns = /^payment|payment thank|online\s*payment|autopay|auto pay|bill\s*pay|pymt/i;
 
             for (const row of rawRows) {
