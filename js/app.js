@@ -325,9 +325,17 @@ function getMonthTransactions() {
         .map(([id, t]) => ({ id, ...t }));
 }
 
+// Check if recurring item applies to a given month (YYYY-MM)
+function isRecurringActiveForMonth(r, month) {
+    if (r.active === false) return false;
+    if (r.startDate && month < r.startDate) return false;
+    if (r.endDate && month > r.endDate) return false;
+    return true;
+}
+
 function getActiveRecurringTotal() {
     return Object.values(data.recurring)
-        .filter(r => r.active !== false && r.type !== 'income')
+        .filter(r => isRecurringActiveForMonth(r, selectedMonth) && r.type !== 'income')
         .reduce((sum, r) => sum + Number(r.amount || 0), 0);
 }
 
@@ -456,7 +464,7 @@ function findMatchingTxn(rName, rAmount, txnPool) {
 }
 
 function getRecurringStatus() {
-    const recurringItems = Object.values(data.recurring).filter(r => r.active !== false && r.type !== 'income');
+    const recurringItems = Object.values(data.recurring).filter(r => isRecurringActiveForMonth(r, selectedMonth) && r.type !== 'income');
     const txnPool = [...getMonthTransactions().filter(t => t.txnType !== 'income')];
     const isCurrentMonth = selectedMonth === getCurrentMonth();
     const isFutureMonth = selectedMonth > getCurrentMonth();
@@ -507,7 +515,7 @@ function getRecurringStatus() {
 }
 
 function getIncomeStatus() {
-    const incomeItems = Object.values(data.recurring).filter(r => r.active !== false && r.type === 'income');
+    const incomeItems = Object.values(data.recurring).filter(r => isRecurringActiveForMonth(r, selectedMonth) && r.type === 'income');
     const txnPool = [...getMonthTransactions().filter(t => t.txnType === 'income')];
     const isCurrentMonth = selectedMonth === getCurrentMonth();
     const isFutureMonth = selectedMonth > getCurrentMonth();
@@ -1186,8 +1194,8 @@ function renderRecurring() {
         grouped[type].push(r);
     });
 
-    const totalExpenses = items.filter(r => r.active !== false && r.type !== 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
-    const totalIncome = items.filter(r => r.active !== false && r.type === 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
+    const totalExpenses = items.filter(r => isRecurringActiveForMonth(r, selectedMonth) && r.type !== 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
+    const totalIncome = items.filter(r => isRecurringActiveForMonth(r, selectedMonth) && r.type === 'income').reduce((s, r) => s + Number(r.amount || 0), 0);
 
     // Generate suggestions (filter out dismissed ones)
     const dismissed = new Set((data.settings.dismissedSuggestions || []).map(s => s.toUpperCase()));
@@ -1223,8 +1231,9 @@ function renderRecurring() {
                                 <div class="recurring-name">${escapeHtml(r.name)}</div>
                                 <div class="recurring-meta">
                                     ${getCategoryLabel(r.category)}
-                                    ${r.dueDay ? ` • Due day ${r.dueDay}` : ''}
+                                    ${r.dueDay ? ` • Day ${r.dueDay}` : ''}
                                     ${r.cardId ? ` • ${getCardName(r.cardId)}` : ''}
+                                    ${r.startDate || r.endDate ? ` • ${r.startDate || '...'} to ${r.endDate || 'ongoing'}` : ''}
                                     ${r.active === false ? ' • <em>Inactive</em>' : ''}
                                 </div>
                             </div>
@@ -1291,6 +1300,16 @@ function recurringFormHtml(r = {}) {
             </div>
             <div class="form-row">
                 <div class="form-group">
+                    <label for="rStartDate">Start Date</label>
+                    <input type="month" id="rStartDate" value="${r.startDate || ''}" placeholder="Leave empty for no start">
+                </div>
+                <div class="form-group">
+                    <label for="rEndDate">End Date</label>
+                    <input type="month" id="rEndDate" value="${r.endDate || ''}" placeholder="Leave empty for ongoing">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
                     <label for="rCard">Card</label>
                     <select id="rCard">${cardOptions()}</select>
                 </div>
@@ -1323,6 +1342,8 @@ window._addRecurring = () => {
             type: document.getElementById('rType').value,
             category: document.getElementById('rCategory').value,
             dueDay: parseInt(document.getElementById('rDueDay').value) || null,
+            startDate: document.getElementById('rStartDate').value || null,
+            endDate: document.getElementById('rEndDate').value || null,
             cardId: document.getElementById('rCard').value,
             active: document.getElementById('rActive').value === 'true',
             notes: document.getElementById('rNotes').value.trim(),
@@ -1347,6 +1368,8 @@ window._editRecurring = (id) => {
             type: document.getElementById('rType').value,
             category: document.getElementById('rCategory').value,
             dueDay: parseInt(document.getElementById('rDueDay').value) || null,
+            startDate: document.getElementById('rStartDate').value || null,
+            endDate: document.getElementById('rEndDate').value || null,
             cardId: document.getElementById('rCard').value,
             active: document.getElementById('rActive').value === 'true',
             notes: document.getElementById('rNotes').value.trim()

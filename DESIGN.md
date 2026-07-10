@@ -54,6 +54,8 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
         category: "housing"
         type: "income" | "bill" | "subscription" | "savings" | "investment"
         dueDay: 1
+        startDate: "2025-01"    // YYYY-MM, null = no start limit
+        endDate: "2026-12"      // YYYY-MM, null = ongoing
         cardId: ""              // optional link to an account
         active: true
         notes: ""
