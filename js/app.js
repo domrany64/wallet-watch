@@ -1780,8 +1780,8 @@ function renderSavings() {
                                     <td>${escapeHtml(inv.name)}</td>
                                     <td><strong>${escapeHtml(inv.ticker || '')}</strong></td>
                                     <td>${inv.shares}</td>
-                                    <td>${fmt(inv.avgCost)}</td>
-                                    <td>${fmt(inv.currentValue || inv.avgCost)}</td>
+                                    <td>${inv.avgCost}</td>
+                                    <td>${inv.currentValue || inv.avgCost}</td>
                                     <td>${fmt(current)}</td>
                                     <td class="${gl >= 0 ? 'gain' : 'loss'}">${gl >= 0 ? '+' : ''}${fmt(gl)}</td>
                                     <td>
