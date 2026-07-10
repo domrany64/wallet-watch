@@ -166,19 +166,12 @@ const PRESET_ACCOUNTS = [
     { name: 'Key Bank Checking', institution: 'keybank', type: 'debit' },
     { name: 'US Bank Checking', institution: 'usbank', type: 'debit' },
     { name: 'OnPoint Checking', institution: 'onpoint', type: 'debit' },
-    { name: 'Upgrade Savings', institution: 'upgrade', type: 'savings' },
     { name: 'Chase Credit Card', institution: 'chase', type: 'credit' },
     { name: 'Citi Credit Card', institution: 'citi', type: 'credit' },
     { name: 'Amex Credit Card', institution: 'amex', type: 'credit' },
     { name: 'Gap Credit Card', institution: 'gap', type: 'credit' },
     { name: 'Nordstrom Credit Card', institution: 'nordstrom', type: 'credit' },
-    { name: 'E*Trade', institution: 'etrade', type: 'investment' },
-    { name: 'Fidelity 401(k)', institution: 'fidelity', type: 'investment' },
-    { name: 'Embark Oregon 529', institution: 'embark', type: 'investment' },
     { name: 'Intel Recognition', institution: 'intel', type: 'other' },
-    { name: 'PayPal', institution: 'paypal', type: 'other' },
-    { name: 'Mr. Cooper Mortgage', institution: 'mrcooper', type: 'loan' },
-    { name: 'Nelnet Student Loans', institution: 'nelnet', type: 'loan' }
 ];
 
 // ===== Firebase Listeners =====
@@ -559,7 +552,8 @@ function getIncomeStatus() {
 // ===== RENDER: Dashboard =====
 function renderDashboard() {
     const incomeStatus = getIncomeStatus();
-    const income = incomeStatus.totalExpected || Number(data.settings.monthlyIncome || 0);
+    const actualMonthIncome = getMonthIncome();
+    const income = actualMonthIncome || incomeStatus.totalExpected || Number(data.settings.monthlyIncome || 0);
     const recurStatus = getRecurringStatus();
     const spent = getMonthSpending();
     const remaining = income - spent;

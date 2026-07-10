@@ -114,12 +114,15 @@ Each user's data is completely isolated. No public read access.
 ## Budget Calculation
 
 ```
-Monthly Income (from recurring income items, fallback to settings)
+Monthly Income (priority: actual income transactions > recurring income items > settings fallback)
   − Sum of expense transactions for the current month
   = Remaining Budget
 ```
 
-Income is calculated dynamically from recurring items of type "income". The dashboard shows how much has been received vs still pending. Falls back to the manual `monthlyIncome` setting if no income recurring items exist.
+Income is calculated dynamically with this priority:
+1. **Actual income transactions** for the month (sum of all `txnType: 'income'` transactions)
+2. **Recurring income items** total (if no income transactions yet)
+3. **Manual `monthlyIncome` setting** (last resort fallback)
 
 Transactions are the **source of truth** for spending. Recurring items are informational — they show what to expect each month but are not deducted separately (to avoid double-counting when a recurring payment also appears as a transaction).
 
