@@ -6,7 +6,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     transport: [
         'COSTCO GAS', 'ARCO', '76 -', 'SPEEDWAY', 'SHELL', 'CHEVRON',
         'PARKING', 'KAADY CAR WASH', 'Transit', 'GARAGE', 'BEAVERTON NISSAN',
-        'BEAVERTON KIA'
+        'BEAVERTON KIA', 'PARKMOBILE'
     ],
     groceries: [
         'COSTCO WHSE', 'TRADER JOE', 'SAFEWAY', 'QFC',
