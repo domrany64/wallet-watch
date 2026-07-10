@@ -41,8 +41,9 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'WAL-MART', 'Nike', 'JANELLE JAMES', 'CARTERS', 'GAP.COM', 'SALLY BEAUTY', 'ZARA',
         'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO', 'Columbia'
     ],
-    housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM',
-              'ADT SECURITY'
+    housing: [
+        'HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM',
+        'ADT SECURITY'
     ],
     healthcare: [
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
@@ -64,9 +65,10 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     camping: [
         'RECREATION.GOV', 'MOUNT RAINIER', 'YOSEMITE'
     ],
-    education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
-                'FABULOUS'
+    education: [
+        'SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
+        'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
+        'FABULOUS'
     ],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
@@ -77,8 +79,9 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     donation: [
         'SIMA NASERI'
     ],
-    utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
-                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI', 'WM.COM'
+    utilities: [
+        'ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
+        'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI', 'WM.COM'
     ],
 };
 
