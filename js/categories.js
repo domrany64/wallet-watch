@@ -35,11 +35,11 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     shopping: [
         'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS', 'THE CHILDRENS PLACE',
         'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS', 'GAP', 'VICTORIAS SECRET',
-        'NORDSTROM', 'H&M', 'CLAIRE', 'DOLLAR TREE', 'KOHL', 'TATCHA', 'Muji',
+        'NORDSTROM', 'H&M', 'CLAIRE', 'DOLLAR TREE', 'KOHL', 'TATCHA', 'Muji', 'LANCOME',
         'BATH AND BODY', 'SEPHORA', 'ULTA', 'UPS STORE', 'FEDEX', 'WWW COSTCO COM',
         'CUTE LIL SHOP', 'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'SHISEIDO', 'DERMSTORE',
         'WAL-MART', 'Nike', 'JANELLE JAMES', 'CARTERS', 'GAP.COM', 'SALLY BEAUTY', 'ZARA',
-        'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO'
+        'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO', 'Columbia'
     ],
     housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM',
               'ADT SECURITY'
@@ -48,19 +48,21 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
         'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
         'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE',
-        'HEALTHCARE', 'PHARMACY', 'LCA Portland'
+        'HEALTHCARE', 'PHARMACY', 'LCA Portland', 'HODA PARVIN', 'NUTRAFOL',
+        'guangmei Yang', 'CHIROPRACTI'
     ],
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
         'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
-        'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J',
+        'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J', 'BERN',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano', 'AIRBNB',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
         'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV', 'SANTA CLARA',
-        'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES'
+        'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES',
+        'Luzern', 'BRIENZ', 'Alpnachstad', 'Menziken', 'Glattbrugg'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM'
+                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI'
     ],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
@@ -72,7 +74,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'SIMA NASERI'
     ],
     utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
-                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI'
+                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI', 'WM.COM'
     ],
 };
 
