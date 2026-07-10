@@ -60,15 +60,19 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     ],
     shopping: [
         'AMAZON', 'BATH AND BODY', 'BURLINGTON', 'CARTERS', 'CLAIRE',
-        'Columbia', 'CUTE LIL SHOP', 'DERMSTORE', 'DOLLAR TREE', 'Estee Lauder',
+        'Columbia', 'CUTE LIL SHOP', 'DERMSTORE', 'DOLLAR TREE',
         'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'FEDEX', 'GAP', 'GAP.COM',
         'GOODWILL', 'H&M', 'HAIR SALO', 'HENNA', 'HOMEGOODS',
-        'IKEA', 'JANELLE JAMES', 'JCPENNEY', 'KOHL', 'LANCOME',
-        'Lush', 'MACYS', 'MARSHALLS', 'Muji', 'Nike', 'NORDSTROM',
-        'PICCOLO MONDO', 'ROSS STORES', 'SALLY BEAUTY', 'SEPHORA',
-        'SHISEIDO', 'TARGET', 'TARGET.COM', 'TATCHA', 'THE CHILDRENS PLACE',
-        'ULTA', 'UPS STORE', 'VICTORIAS SECRET', 'WAL-MART', 'WAYFAIR',
+        'IKEA', 'JANELLE JAMES', 'JCPENNEY', 'KOHL',
+        'MACYS', 'MARSHALLS', 'Muji', 'Nike', 'NORDSTROM',
+        'PICCOLO MONDO', 'ROSS STORES',
+        'TARGET', 'TARGET.COM', 'THE CHILDRENS PLACE',
+        'UPS STORE', 'VICTORIAS SECRET', 'WAL-MART', 'WAYFAIR',
         'WWW COSTCO COM', 'ZARA'
+    ],
+    beauty: [
+        'SEPHORA', 'ULTA', 'THE BODY SHOP', 'LUSH', 'DERMSTORE', 'TATCHA',
+        'SHISEIDO', 'SALLY BEAUTY', 'Estee Lauder', 'LANCOME'
     ],
     subscriptions: [
         'MONTHLY MAINTENANCE FEE'

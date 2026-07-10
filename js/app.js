@@ -90,6 +90,7 @@ const CATEGORIES = {
     education: { icon: '📚', label: 'Education' },
     subscriptions: { icon: '📱', label: 'Subscriptions' },
     savings: { icon: '🏦', label: 'Savings' },
+    beauty: { icon: '💄', label: 'Beauty' },
     investments: { icon: '📈', label: 'Investments' },
     insurance: { icon: '🛡️', label: 'Insurance' },
     gifts: { icon: '🎁', label: 'Gifts' },
