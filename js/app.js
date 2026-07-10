@@ -108,18 +108,23 @@ function matchDescriptionCategory(description) {
     if (!description) return null;
     const upper = description.toUpperCase().trim();
 
-    // Check user custom mappings first (from Firebase)
+    // Check user custom mappings first (from Firebase) — longest match wins
     const userMappings = data.settings?.categoryMappings || {};
+    let best = null, bestLen = 0;
     for (const [pattern, category] of Object.entries(userMappings)) {
-        if (upper.includes(pattern.toUpperCase())) return category;
+        if (upper.includes(pattern.toUpperCase()) && pattern.length > bestLen) {
+            best = category; bestLen = pattern.length;
+        }
     }
+    if (best) return best;
 
-    // Check built-in defaults
+    // Check built-in defaults — longest match wins
     for (const [pattern, category] of Object.entries(DEFAULT_CATEGORY_MAPPINGS)) {
-        if (upper.includes(pattern.toUpperCase())) return category;
+        if (upper.includes(pattern.toUpperCase()) && pattern.length > bestLen) {
+            best = category; bestLen = pattern.length;
+        }
     }
-
-    return null;
+    return best;
 }
 
 const RECURRING_TYPES = {
