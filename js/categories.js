@@ -48,7 +48,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
         'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
         'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE',
-        'HEALTHCARE', 'PHARMACY'
+        'HEALTHCARE', 'PHARMACY', 'LCA Portland'
     ],
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
@@ -67,6 +67,9 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'MARION ACRES', 'CRYSTAL SPRINGS', 'TUALATIN HILLS PARK', 'REGIONAL PARK BLUE',
         'TRISKELEE FARM', 'Oregon Museum', 'OMSI', 'Pittock Mansion', 'woodenshoe.com',
         'G2A', 'GAMES', 'GAMIVO', 'Museum', 'GAMEROW'
+    ],
+    donation: [
+        'SIMA NASERI'
     ],
     utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
                 'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI'

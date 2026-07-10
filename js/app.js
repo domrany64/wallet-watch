@@ -96,6 +96,7 @@ const CATEGORIES = {
     travel: { icon: '✈️', label: 'Travel' },
     childcare: { icon: '👶', label: 'Childcare' },
     pets: { icon: '🐾', label: 'Pets' },
+    donation: { icon: '🤲', label: 'Donation' },
     other: { icon: '📦', label: 'Other' }
 };
 
