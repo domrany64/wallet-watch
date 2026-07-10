@@ -796,9 +796,10 @@ function renderTransactions() {
                 Date range
             </label>
             ${dateRangeMode ? `
-                <input type="date" id="dateFrom" value="${dateRangeFrom}" onchange="window._updateDateRange()" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+                <input type="date" id="dateFrom" value="${dateRangeFrom}" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
                 <span style="color:var(--text-muted)">to</span>
-                <input type="date" id="dateTo" value="${dateRangeTo}" onchange="window._updateDateRange()" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+                <input type="date" id="dateTo" value="${dateRangeTo}" style="padding:0.4rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem">
+                <button class="btn btn-sm btn-primary" onclick="window._updateDateRange()">Go</button>
             ` : ''}
         </div>
 
