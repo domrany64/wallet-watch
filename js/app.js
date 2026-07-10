@@ -1670,18 +1670,24 @@ function renderSavings() {
                                 const deadlineDate = new Date(g.deadline);
                                 const deadlineMonths = Math.round((deadlineDate - new Date()) / (1000 * 60 * 60 * 24 * 30));
                                 if (estDate <= deadlineDate) {
-                                    projection = `✅ On track — est. ${estStr}${apyLabel}`;
-                                    statusColor = 'var(--primary)';
+                                    const moEarly = Math.round((deadlineDate - estDate) / (1000 * 60 * 60 * 24 * 30));
+                                    if (moEarly >= 3) {
+                                        projection = `🚀 ${moEarly}mo early — est. ${estStr}${apyLabel}`;
+                                        statusColor = 'var(--info)';
+                                    } else {
+                                        projection = `✅ On track — est. ${estStr}${apyLabel}`;
+                                        statusColor = 'var(--primary)';
+                                    }
                                 } else {
-                                    const lateMo = Math.round((estDate - deadlineDate) / (1000 * 60 * 60 * 24 * 30));
-                                    // $ shortfall: how much would be saved by deadline vs target
+                                    const lateMo = Math.max(1, Math.ceil((estDate - deadlineDate) / (1000 * 60 * 60 * 24 * 30)));
+                                    const moUntilDeadline = Math.max(0, deadlineMonths);
                                     let savedByDeadline = current;
-                                    if (deadlineMonths > 0) {
+                                    if (moUntilDeadline > 0) {
                                         if (apy > 0) {
                                             const r = apy / 100 / 12;
-                                            savedByDeadline = current * Math.pow(1 + r, deadlineMonths) + (monthly > 0 ? monthly * (Math.pow(1 + r, deadlineMonths) - 1) / r : 0);
+                                            savedByDeadline = current * Math.pow(1 + r, moUntilDeadline) + (monthly > 0 ? monthly * (Math.pow(1 + r, moUntilDeadline) - 1) / r : 0);
                                         } else {
-                                            savedByDeadline = current + monthly * deadlineMonths;
+                                            savedByDeadline = current + monthly * moUntilDeadline;
                                         }
                                     }
                                     const dollarShort = Math.max(0, target - savedByDeadline);
@@ -1695,10 +1701,11 @@ function renderSavings() {
                         }
                     }
 
-                    const onTrack = statusColor === 'var(--primary)';
                     const late = statusColor === 'var(--danger)';
+                    const early = statusColor === 'var(--info)';
                     const cardBorder = remaining <= 0 ? 'border-left:3px solid var(--primary)' :
-                                       late ? 'border-left:3px solid var(--danger)' : '';
+                                       late ? 'border-left:3px solid var(--danger)' :
+                                       early ? 'border-left:3px solid var(--info)' : '';
 
                     return `
                         <div class="savings-item" style="${cardBorder}">
