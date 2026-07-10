@@ -1805,11 +1805,11 @@ function investFormHtml(inv = {}) {
                 </div>
                 <div class="form-group">
                     <label for="iAvgCost">Avg Cost ($)</label>
-                    <input type="number" id="iAvgCost" min="0" step="0.01" required value="${inv.avgCost || ''}">
+                    <input type="number" id="iAvgCost" min="0" step="any" required value="${inv.avgCost || ''}">
                 </div>
                 <div class="form-group">
                     <label for="iCurrent">Current Price ($)</label>
-                    <input type="number" id="iCurrent" min="0" step="0.01" value="${inv.currentValue || ''}">
+                    <input type="number" id="iCurrent" min="0" step="any" value="${inv.currentValue || ''}">
                 </div>
             </div>
             <div class="form-group">
