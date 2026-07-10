@@ -558,6 +558,7 @@ function renderDashboard() {
     const spent = getMonthSpending();
     const remaining = income - spent;
     const txns = getMonthTransactions().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    const incomeTxns = txns.filter(t => t.txnType === 'income');
 
     // Budget bar: spent as % of income
     const pct = income > 0 ? Math.min((spent / income) * 100, 100) : 0;
@@ -608,10 +609,10 @@ function renderDashboard() {
         ${monthNavHtml()}
 
         <div class="summary-grid">
-            <div class="summary-card${incomeStatus.total > 0 ? ' clickable' : ''}" ${incomeStatus.total > 0 ? 'onclick="window._toggleIncomeDetail()"' : ''}>
+            <div class="summary-card clickable" onclick="window._toggleIncomeDetail()">
                 <div class="label">Income</div>
                 <div class="value neutral">${fmt(income)}</div>
-                ${incomeStatus.total > 0 ? `<div class="sub">${fmt(incomeStatus.receivedTotal)} received${incomeStatus.pendingTotal > 0 ? ` • ${fmt(incomeStatus.pendingTotal)} pending` : ''}</div>` : ''}
+                <div class="sub">${incomeTxns.length} transaction${incomeTxns.length !== 1 ? 's' : ''}${incomeStatus.pendingTotal > 0 ? ` • ${fmt(incomeStatus.pendingTotal)} pending` : ''} • click for details</div>
             </div>
             <div class="summary-card">
                 <div class="label">Spent</div>
@@ -653,29 +654,26 @@ function renderDashboard() {
             </div>
         </div>
 
-        ${incomeStatus.total > 0 ? `
         <div class="recurring-detail" id="incomeDetail" style="display:none">
             <div class="card" style="margin-bottom:1.5rem">
                 <div class="card-header">
-                    <span class="card-title">Income Status — ${monthLabel(selectedMonth)}</span>
+                    <span class="card-title">Income — ${monthLabel(selectedMonth)}</span>
                     <button class="btn-icon" onclick="window._toggleIncomeDetail()">✕</button>
                 </div>
-                ${incomeStatus.items.map(item => {
-                    const statusIcon = item.status === 'received' ? '✅' : item.status === 'missed' ? '⚠️' : '⏳';
-                    const statusLabel = item.status === 'received' ? 'Received' : item.status === 'missed' ? 'Missed' : 'Pending';
-                    const statusColor = item.status === 'received' ? 'var(--primary)' : item.status === 'missed' ? 'var(--danger)' : 'var(--warning)';
-                    return `
+                ${incomeTxns.length > 0 ? incomeTxns.map(t => `
                     <div class="recurring-detail-row">
-                        <span class="recurring-detail-icon">${statusIcon}</span>
-                        <span class="recurring-detail-name">${escapeHtml(item.name)}</span>
-                        ${item.dueDay ? `<span class="recurring-detail-meta">Day ${item.dueDay}</span>` : ''}
-                        ${item.cardId ? `<span class="recurring-detail-meta">${getCardName(item.cardId)}</span>` : ''}
-                        <span class="recurring-detail-amount" style="color:var(--primary)">+${fmt(item.amount)}</span>
-                        <span class="recurring-detail-status" style="color:${statusColor}">${statusLabel}</span>
-                    </div>`;
-                }).join('')}
+                        <span class="recurring-detail-icon">💰</span>
+                        <span class="recurring-detail-name">${escapeHtml(t.description)}</span>
+                        <span class="recurring-detail-meta">${t.date}</span>
+                        ${t.cardId ? `<span class="recurring-detail-meta">${getCardName(t.cardId)}</span>` : ''}
+                        <span class="recurring-detail-amount" style="color:var(--primary)">+${fmt(t.amount)}</span>
+                    </div>`).join('') : '<div style="padding:1rem;color:var(--text-muted);font-size:0.85rem">No income transactions this month</div>'}
+                ${incomeStatus.items.length > 0 ? `
+                    <div style="border-top:1px solid var(--border);margin-top:0.75rem;padding-top:0.75rem;font-size:0.75rem;color:var(--text-muted)">
+                        Expected: ${incomeStatus.items.map(i => `${escapeHtml(i.name)} ${i.status === 'received' ? '✅' : i.status === 'missed' ? '⚠️' : '⏳'}`).join(' • ')}
+                    </div>` : ''}
             </div>
-        </div>` : ''}
+        </div>
 
         <div class="budget-bar-container">
             <div class="budget-bar-labels">
@@ -1856,7 +1854,6 @@ window._deleteInvestment = (id) => {
 
 // ===== Settings =====
 document.getElementById('settingsBtn').addEventListener('click', () => {
-    document.getElementById('settingsIncome').value = data.settings.monthlyIncome || '';
     document.getElementById('settingsCurrency').value = data.settings.currency || '$';
     const spenders = data.settings.spenders;
     document.getElementById('settingsSpenders').value = Array.isArray(spenders) ? spenders.join(', ') : (spenders || '');
@@ -1868,7 +1865,7 @@ document.getElementById('settingsForm').addEventListener('submit', (e) => {
     const spendersRaw = document.getElementById('settingsSpenders').value;
     const spenders = spendersRaw.split(',').map(s => s.trim()).filter(Boolean);
     set(dbRef('settings'), {
-        monthlyIncome: parseFloat(document.getElementById('settingsIncome').value) || 0,
+        ...data.settings,
         currency: document.getElementById('settingsCurrency').value.trim() || '$',
         spenders
     }).then(() => {
