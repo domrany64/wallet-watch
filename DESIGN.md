@@ -158,7 +158,7 @@ Dedup key: `date|amount|description|txnType|cardId`. Same transaction on differe
 
 Auto-skipped as inter-account transfers (not spending):
 - Credit card payments: `citi card`, `chase credit`, `barclaycard`, `amex epayment`, `credit crd`, `nordstrom payment`
-- Inter-bank transfers: `real time payment`, `rtp rec`, `rtp-`, `funds tran`, `internet trf`, `onpoint ccu`, `upgrade crb`, `upgrade.*transfer`
+- Inter-bank transfers: `real time payment`, `rtp rec`, `rtp-`, `funds tran`, `internet trf`, `onpoint ccu`, `upgrade crb`, `upgrade.*transfer`, `^transfer$`, `^transfer to`, `^transfer from`, `external transfer`
 - Payment descriptions: `payment thank`, `online payment`, `autopay`, `bill pay`, `pymt`
 
 Note: PayPal is NOT imported separately. PayPal activity captured from Key Bank side:
