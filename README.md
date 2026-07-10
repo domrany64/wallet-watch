@@ -11,15 +11,15 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 - **Dynamic income tracking** — Income calculated from recurring income items; shows how much received vs still pending with clickable detail panel
 - **Transaction tracking** — Quick-add expenses with category, amount, card, spender, and description; filter by type (expense/income/refund), sort by date or amount
 - **Income & expense classification** — Transactions auto-classified as income (green +$), expense (red -$), refund (blue +$, subtracts from spending), or transfer (auto-skipped to avoid double-counting)
-- **Auto-categorization** — 100+ built-in description-to-category mappings (Costco Gas = transport, Trader Joe = groceries, etc.) plus user-learned custom mappings
+- **Auto-categorization** — 100+ built-in description-to-category mappings across 14 categories, alphabetically organized in `js/categories.js`. Longest-match wins: specific patterns (e.g. `BAZAAR WORLD FOOD`) always beat generic ones (e.g. `FOOD`). Plus user-learned custom mappings
 - **Category learning** — When you change a transaction's category in the app, prompts to save the description pattern for future auto-categorization
 - **Recurring commitments** — Manage fixed monthly items grouped by type: Income, Bills, Subscriptions, Savings, and Investments
 - **Smart suggestions** — Analyzes transaction history to detect recurring patterns (2+ months) and suggests them as recurring items with accept/dismiss
 - **Multi-account support** — Track debit, credit, savings, investment, loan, and other accounts with institution icons (Key Bank, Chase, Citi, Amex, E*Trade, Fidelity, etc.)
 - **Quick Setup** — One-click preset to add all your accounts at once (16 pre-configured institutions)
 - **Multi-spender** — Track who spends what (e.g. you and your spouse)
-- **Savings goals** — Set targets with progress tracking and monthly contributions
-- **Investment tracking** — Log stock/investment holdings with cost basis and current value
+- **Savings goals** — Set targets with progress tracking, monthly contributions, and APY compound growth estimator. Goals show 🚀 early / ✅ on track / ⚠️ late status with color-coded borders
+- **Investment tracking** — Log stock/investment holdings with cost basis and current price (full precision, no rounding); live price refresh via Yahoo Finance with per-ticker log
 - **Per-category breakdown** — See spending distribution across 19 categories (groceries, dining, transport, etc.)
 - **Per-spender breakdown** — See who's spending what on the dashboard
 - **Month navigation** — Browse current and past months with full history

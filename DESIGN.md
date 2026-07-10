@@ -65,7 +65,7 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
         amount: 54.32
         category: "groceries"
         description: "Costco"
-        txnType: "expense" | "income"  // auto-classified during import
+        txnType: "expense" | "income" | "refund"  // auto-classified during import; editable in UI
         cardId: "abc123"
         spender: "Damon"
         date: "2026-07-06"
@@ -175,7 +175,9 @@ Note: PayPal is NOT imported separately. PayPal activity captured from Key Bank 
 
 Transactions are auto-categorized by matching description text against patterns:
 1. **User custom mappings** (stored in Firebase `settings.categoryMappings`) — checked first
-2. **Built-in defaults** (100+ patterns) — Costco Gas = transport, Trader Joe = groceries, etc.
+2. **Built-in defaults** (`js/categories.js`, 100+ patterns across 14 categories, alphabetically sorted)
+
+**Matching rule:** All patterns are tested against the description; the **longest matching pattern wins**. This prevents short generic patterns (e.g. `FOOD`) from overriding longer specific ones (e.g. `BAZAAR WORLD FOOD`). Implemented in `app.js`, `import-csv.html`, and `recategorize.html`.
 
 When a user edits a transaction's category in the app, a prompt offers to save the description pattern as a new mapping. The suggested pattern auto-strips store numbers and state codes for broader matching.
 
@@ -223,6 +225,7 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 - Scans all transactions against current mappings (built-in + user custom)
 - Option to only re-evaluate "Other" category (safe default)
 - Preview table: date, description, old category (strikethrough), new category
+- All rows selected by default; **Select None** / **Select All** buttons for bulk deselect/reselect
 - Selectable per-row, bulk apply in single Firebase write
 
 ### Delete by Card Tool (/delete-by-card.html)
@@ -246,9 +249,13 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 - Supported institutions: Key Bank, US Bank, OnPoint, Upgrade, Chase, Citi, Amex, Gap, Nordstrom, E*Trade, Fidelity, Embark Oregon, Intel, PayPal, Mr. Cooper, Nelnet
 
 ### Savings View
-- Savings goals with progress bars (current/target)
-- Investment holdings table (ticker, shares, cost, current value, gain/loss)
-- **Refresh Prices** button fetches live prices for all tickers via Yahoo Finance (unofficial API via allorigins.win CORS proxy). No API key required. May be unavailable if Yahoo rate-limits.
+- Savings goals with progress bars (current/target) and APY compound growth estimator
+  - **Status badges:** ✅ Goal reached · 🚀 Xmo early (blue, ≥3mo ahead of deadline) · ✅ On track (green) · ⚠️ Xmo late, $Y short (red) · Est. Xmo (grey, no deadline)
+  - Early/on-track/late determined by comparing estimated completion date to deadline; $-short uses compound growth formula over remaining months; rounding artifacts suppressed (< $0.50 shortfall = on track)
+  - APY field accepts any decimal precision
+- Investment holdings table (ticker, shares, avg cost, current price, total value, gain/loss)
+  - Avg cost and current price shown at full precision (not rounded)
+  - **Refresh Prices** button fetches live prices for all tickers via Yahoo Finance (unofficial API via allorigins.win CORS proxy). No API key required. May be unavailable if Yahoo rate-limits. Log modal shows per-ticker status.
 
 ### Future: API key-based price fetching
 For more reliable quotes, replace Yahoo with a keyed service. Store key in Firebase `settings.stockApiKey`. Options:
