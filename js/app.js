@@ -1827,7 +1827,7 @@ function goalFormHtml(g = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label for="gGrowth">Expected Growth (% APY)</label>
-                    <input type="number" id="gGrowth" min="0" max="100" step="0.1" value="${g.expectedGrowth || ''}" placeholder="e.g. 5 for 5%">
+                    <input type="number" id="gGrowth" min="0" max="100" step="any" value="${g.expectedGrowth || ''}" placeholder="e.g. 5 for 5%">
                 </div>
                 <div class="form-group">
                     <label for="gNotes">Notes</label>
