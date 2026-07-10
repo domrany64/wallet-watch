@@ -907,7 +907,12 @@ function renderTransactions() {
     if (txnFilters.category) document.getElementById('filterCategory').value = txnFilters.category;
     if (txnFilters.type) document.getElementById('filterType').value = txnFilters.type;
     if (txnFilters.sort) document.getElementById('filterSort').value = txnFilters.sort;
-    if (txnFilters.search) document.getElementById('filterSearch').value = txnFilters.search;
+    // Explicitly set search value and override any browser autofill after a short delay
+    const searchEl = document.getElementById('filterSearch');
+    if (searchEl) {
+        searchEl.value = txnFilters.search || '';
+        setTimeout(() => { searchEl.value = txnFilters.search || ''; }, 300);
+    }
 }
 
 function handleQuickAdd(e) {
