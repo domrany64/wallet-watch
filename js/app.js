@@ -1642,7 +1642,7 @@ function renderSavings() {
                         const estStr = estDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 
                         if (g.deadline) {
-                            const deadlineDate = new Date(g.deadline + '-01');
+                            const deadlineDate = new Date(g.deadline);
                             if (estDate <= deadlineDate) {
                                 projection = `✅ On track — est. ${estStr}`;
                                 statusColor = 'var(--primary)';
