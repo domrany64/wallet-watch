@@ -66,7 +66,7 @@ let data = {
 let currentView = 'dashboard';
 let selectedMonth = getCurrentMonth();
 let listeners = [];
-let txnFilters = { card: '', spender: '', category: '', type: '', sort: 'date-desc' };
+let txnFilters = { card: '', spender: '', category: '', type: '', sort: 'amount-desc' };
 let dateRangeMode = false;
 let dateRangeFrom = '';
 let dateRangeTo = '';
@@ -372,6 +372,12 @@ function showToast(msg) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
+
+window._viewCategory = (cat) => {
+    txnFilters.category = cat;
+    txnFilters.type = 'expense';
+    window.location.hash = '#/transactions';
+};
 
 // ===== Modal Helpers =====
 function showOverlay(id) {
@@ -687,7 +693,7 @@ function renderDashboard() {
                 <div class="category-bars">
                     ${catSorted.length === 0 ? '<div style="color:var(--text-dim);font-size:0.85rem">No spending yet</div>' :
                         catSorted.slice(0, 8).map(([cat, total]) => `
-                            <div class="category-bar-row">
+                            <div class="category-bar-row" style="cursor:pointer" onclick="window._viewCategory('${cat}')">
                                 <span class="category-bar-label">${getCategoryIcon(cat)} ${getCategoryLabel(cat)}</span>
                                 <div class="category-bar-track">
                                     <div class="category-bar-fill" style="width: ${(total / maxCat) * 100}%"></div>
