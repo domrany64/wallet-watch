@@ -866,7 +866,7 @@ function renderTransactions() {
         </div>` : ''}` : ''}
 
         <div class="filter-bar">
-            <input type="text" id="filterSearch" placeholder="Search description..." value="" onkeyup="window._searchDebounce()" style="padding:0.4rem 0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;font-family:var(--font);min-width:160px">
+            <input type="text" id="filterSearch" placeholder="Search description..." value="" autocomplete="off" onkeyup="window._searchDebounce()" style="padding:0.4rem 0.6rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;font-family:var(--font);min-width:160px">
             <select id="filterCard" onchange="window._applyTxnFilter()">
                 <option value="">All Cards</option>
                 ${cardOptions(false)}
