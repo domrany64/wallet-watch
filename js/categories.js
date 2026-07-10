@@ -62,7 +62,8 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'Luzern', 'BRIENZ', 'Alpnachstad', 'Menziken', 'Glattbrugg'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI'
+                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
+                'FABULOUS'
     ],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
