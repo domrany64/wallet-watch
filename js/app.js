@@ -98,6 +98,7 @@ const CATEGORIES = {
     childcare: { icon: '👶', label: 'Childcare' },
     pets: { icon: '🐾', label: 'Pets' },
     donation: { icon: '🤲', label: 'Donation' },
+    fine: { icon: '⚖️', label: 'Fines' },
     other: { icon: '📦', label: 'Other' }
 };
 

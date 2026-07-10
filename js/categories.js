@@ -70,7 +70,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'ULTA', 'UPS STORE', 'VICTORIAS SECRET', 'WAL-MART', 'WAYFAIR',
         'WWW COSTCO COM', 'ZARA'
     ],
-    subscription: [
+    subscriptions: [
         'MONTHLY MAINTENANCE FEE'
     ],
     transport: [
