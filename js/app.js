@@ -1823,9 +1823,6 @@ function investFormHtml(inv = {}) {
         </form>`;
 }
 
-        </form>`;
-}
-
 window._refreshPrices = async () => {
     const investments = Object.entries(data.investments || {});
     const tickers = [...new Set(investments.map(([, inv]) => inv.ticker).filter(Boolean))];
