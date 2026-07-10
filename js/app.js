@@ -1156,7 +1156,7 @@ function renderSuggestionItem(s) {
     const icon = s.isIncome ? '💰' : getCategoryIcon(s.category);
     const badge = s.isFixed ? '<span class="suggest-badge fixed">Fixed</span>' : '<span class="suggest-badge variable">Variable</span>';
     const typeBadge = s.isIncome ? '<span class="suggest-badge income">Income</span>' : '';
-    const safeName = escapeHtml(s.name).replace(/'/g, '&#39;');
+    const dataName = escapeHtml(s.name);
     return `
         <div class="recurring-item suggestion-item">
             <div class="txn-icon">${icon}</div>
@@ -1170,8 +1170,8 @@ function renderSuggestionItem(s) {
             </div>
             <div class="recurring-amount">${s.isIncome ? '+' : ''}${fmt(s.amount)}</div>
             <div class="recurring-actions" style="opacity:1">
-                <button class="btn-icon" onclick="window._addSuggestion('${safeName}')" title="Add as recurring" style="color:var(--primary)">✅</button>
-                <button class="btn-icon" onclick="window._dismissSuggestion('${safeName}')" title="Dismiss">❌</button>
+                <button class="btn-icon suggest-add-btn" data-name="${dataName}" title="Add as recurring" style="color:var(--primary)">✅</button>
+                <button class="btn-icon suggest-dismiss-btn" data-name="${dataName}" title="Dismiss">❌</button>
             </div>
         </div>`;
 }
@@ -1260,6 +1260,14 @@ function renderRecurring() {
                 ` : ''}
             </div>` : ''}
     `;
+
+    // Event delegation for suggestion buttons (avoids onclick with special chars)
+    mainContent.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.suggest-add-btn');
+        const dismissBtn = e.target.closest('.suggest-dismiss-btn');
+        if (addBtn) window._addSuggestion(addBtn.dataset.name);
+        if (dismissBtn) window._dismissSuggestion(dismissBtn.dataset.name);
+    }, { once: true });
 }
 
 function recurringFormHtml(r = {}) {
