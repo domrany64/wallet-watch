@@ -1831,33 +1831,60 @@ window._refreshPrices = async () => {
     const btn = document.getElementById('refreshPricesBtn');
     if (btn) { btn.textContent = '⏳ Fetching...'; btn.disabled = true; }
 
+    // Show log modal
+    showModal('🔄 Fetching Stock Prices', `
+        <div class="modal-form">
+            <div id="priceLog" style="background:var(--bg);border-radius:8px;padding:1rem;font-family:monospace;font-size:0.8rem;line-height:1.8;min-height:100px;max-height:300px;overflow-y:auto">
+                <div style="color:var(--text-muted)">Starting fetch for: ${tickers.join(', ')}</div>
+            </div>
+            <div class="form-actions" style="margin-top:1rem">
+                <button class="btn btn-secondary" onclick="window._hideModal()">Close</button>
+            </div>
+        </div>
+    `);
+
+    const log = document.getElementById('priceLog');
+    const addLog = (msg, color = 'var(--text-muted)') => {
+        if (log) log.innerHTML += `<div style="color:${color}">${msg}</div>`;
+        if (log) log.scrollTop = log.scrollHeight;
+    };
+
     let updated = 0;
     for (const ticker of tickers) {
         try {
+            addLog(`⏳ Fetching ${ticker}...`);
             const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
             const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
             const res = await fetch(proxy);
+            if (!res.ok) { addLog(`✗ ${ticker}: HTTP ${res.status}`, 'var(--danger)'); continue; }
             const json = await res.json();
+            if (!json.contents) { addLog(`✗ ${ticker}: empty response from proxy`, 'var(--danger)'); continue; }
             const parsed = JSON.parse(json.contents);
             const price = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
-            if (!price) continue;
+            if (!price) {
+                const errMsg = parsed?.chart?.error?.description || 'no price in response';
+                addLog(`✗ ${ticker}: ${errMsg}`, 'var(--warning)');
+                continue;
+            }
 
-            // Update all investments with this ticker
+            addLog(`✓ ${ticker}: $${price}`, 'var(--primary)');
+
             const updates = {};
             investments.forEach(([id, inv]) => {
                 if (inv.ticker === ticker) {
-                    updates[`households/${currentUser.uid}/investments/${id}/currentValue`] = Math.round(price * 100) / 100;
+                    updates[`households/${currentUser.uid}/investments/${id}/currentValue`] = Math.round(price * 10000) / 10000;
                     updates[`households/${currentUser.uid}/investments/${id}/updatedAt`] = Date.now();
                 }
             });
             await update(ref(db), updates);
             updated++;
         } catch (err) {
-            console.warn(`Failed to fetch ${ticker}:`, err.message);
+            addLog(`✗ ${ticker}: ${err.message}`, 'var(--danger)');
         }
     }
 
-    showToast(updated > 0 ? `Updated ${updated} of ${tickers.length} tickers` : 'Failed to fetch prices (Yahoo may be unavailable)');
+    addLog(`— Done: ${updated} of ${tickers.length} updated —`);
+    if (btn) { btn.textContent = '🔄 Refresh Prices'; btn.disabled = false; }
     handleRoute();
 };
 
