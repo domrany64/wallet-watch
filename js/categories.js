@@ -27,24 +27,25 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'DAVESHOTCHICKEN', 'SALT & STRAW', 'PARIS BAGUETTE', 'STRIPES',
         'PHO TANGO', 'GENGIS KHAN', 'Grill', 'BASKIN', 'CHOCOLATE', 'Fast food',
         'BIGTOWNHERO', 'EATALY', 'BRAGANZA TEA', 'BUFFET', 'JAMBA JUICE', 'SIZZLE PIE',
-        'PHILLY CHEESE', 'DOMINOS', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
+        'PHILLY CHEESE', 'DOMINO\'S', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
         'HOLIDAY MOKA', 'CHURROS', 'Pizzeria', 'IHOP', 'LEVANT', 'COFFEE',
-        'CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT', 'BOBADOCHI', 'AUNTIE ANNES'
+        'CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT', 'BOBADOCHI', 'AUNTIE ANNES',
+        'CHA CHA CHA Taqueria', 'ARTISAN BAKE', 'FOOD'
     ],
     shopping: [
         'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS', 'THE CHILDRENS PLACE',
-        'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS', 'GAP OUTLET',
-        'NORDSTROM', 'GAP US', 'H&M', 'CLAIRE', 'DOLLAR TREE', 'KOHL', 'TATCHA', 'Muji',
+        'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS', 'GAP',
+        'NORDSTROM', 'H&M', 'CLAIRE', 'DOLLAR TREE', 'KOHL', 'TATCHA', 'Muji',
         'BATH AND BODY', 'SEPHORA', 'ULTA', 'UPS STORE', 'FEDEX', 'WWW COSTCO COM',
         'CUTE LIL SHOP', 'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'SHISEIDO', 'DERMSTORE',
         'WAL-MART', 'Nike', 'JANELLE JAMES', 'CARTERS', 'GAP.COM', 'SALLY BEAUTY', 'ZARA',
-        'PICCOLO MONDO', 'IKEA', 'WAYFAIR'
+        'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO'
     ],
     housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM'],
     healthcare: [
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
         'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
-        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN'
+        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE'
     ],
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
@@ -53,18 +54,19 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg',
         'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV',
-        'SAN JOSE', 'Santa Cruz'
+        'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE'
+                'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM'
     ],
     entertainment: [
         'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
         'MARION ACRES', 'CRYSTAL SPRINGS', 'TUALATIN HILLS PARK', 'REGIONAL PARK BLUE',
-        'TRISKELEE FARM', 'Oregon Museum', 'OMSI', 'Pittock Mansion', 'woodenshoe.com'
+        'TRISKELEE FARM', 'Oregon Museum', 'OMSI', 'Pittock Mansion', 'woodenshoe.com',
+        'G2A', 'GAMES', 'GAMIVO', 'Museum'
     ],
     utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
-                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI'],
+                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI'],
 };
 
 // Flattened lookup: pattern -> category
