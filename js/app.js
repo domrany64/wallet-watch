@@ -1853,17 +1853,28 @@ window._refreshPrices = async () => {
     for (const ticker of tickers) {
         try {
             addLog(`⏳ Fetching ${ticker}...`);
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
-            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-            const res = await fetch(proxy);
-            if (!res.ok) { addLog(`✗ ${ticker}: HTTP ${res.status}`, 'var(--danger)'); continue; }
-            const json = await res.json();
-            if (!json.contents) { addLog(`✗ ${ticker}: empty response from proxy`, 'var(--danger)'); continue; }
-            const parsed = JSON.parse(json.contents);
-            const price = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+            const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
+            // Try multiple CORS proxies in order
+            const proxies = [
+                `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+            ];
+
+            let price = null;
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+                    if (!res.ok) continue;
+                    const json = await res.json();
+                    const raw = json.contents || json;
+                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    const p = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+                    if (p) { price = p; break; }
+                } catch (_) { /* try next proxy */ }
+            }
+
             if (!price) {
-                const errMsg = parsed?.chart?.error?.description || 'no price in response';
-                addLog(`✗ ${ticker}: ${errMsg}`, 'var(--warning)');
+                addLog(`✗ ${ticker}: all proxies failed or no price returned`, 'var(--warning)');
                 continue;
             }
 
