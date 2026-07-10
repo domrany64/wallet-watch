@@ -14,7 +14,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'MARKET OF CHOICE', 'BAZAAR WORLD FOOD', 'BAZAAR FOOD MARKET',
         'FRESH HALAL', 'ARIANA FOOD MARKET', 'ROSE INTERNATIONAL',
         'UNIQUE INTERNATIONAL MAR', 'PERSIA FOODS', 'CHEFSTORE',
-        'BARBUR WORLD FOODS'
+        'BARBUR WORLD FOODS', 'BHAIS'
     ],
     dining: [
         'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
@@ -41,11 +41,14 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'WAL-MART', 'Nike', 'JANELLE JAMES', 'CARTERS', 'GAP.COM', 'SALLY BEAUTY', 'ZARA',
         'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO'
     ],
-    housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM'],
+    housing: ['HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM',
+              'ADT SECURITY'
+    ],
     healthcare: [
         'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
         'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
-        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE'
+        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE',
+        'HEALTHCARE'
     ],
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
@@ -66,7 +69,8 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'G2A', 'GAMES', 'GAMIVO', 'Museum'
     ],
     utilities: ['ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
-                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI'],
+                'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI'
+    ],
 };
 
 // Flattened lookup: pattern -> category
