@@ -987,6 +987,14 @@ window._editTxn = (id) => {
             </div>
             <div class="form-row-3">
                 <div class="form-group">
+                    <label for="etType">Type</label>
+                    <select id="etType">
+                        <option value="expense">Expense</option>
+                        <option value="income">Income</option>
+                        <option value="refund">Refund</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="etCard">Card</label>
                     <select id="etCard">${cardOptions()}</select>
                 </div>
@@ -1007,6 +1015,7 @@ window._editTxn = (id) => {
     `);
 
     document.getElementById('etCategory').value = t.category || 'other';
+    document.getElementById('etType').value = t.txnType || 'expense';
     document.getElementById('etCard').value = t.cardId || '';
     document.getElementById('etSpender').value = t.spender || '';
 
@@ -1032,6 +1041,7 @@ window._editTxn = (id) => {
             amount: parseFloat(document.getElementById('etAmount').value),
             category: newCategory,
             description: desc,
+            txnType: document.getElementById('etType').value,
             cardId: document.getElementById('etCard').value,
             spender: document.getElementById('etSpender').value,
             date,
