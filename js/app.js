@@ -1623,9 +1623,50 @@ function renderSavings() {
                     <p>No savings goals yet. Add one to start tracking!</p>
                 </div>` :
                 goals.map(g => {
-                    const pct = Number(g.targetAmount) > 0 ? Math.min((Number(g.currentAmount) / Number(g.targetAmount)) * 100, 100) : 0;
+                    const current = Number(g.currentAmount || 0);
+                    const target = Number(g.targetAmount || 0);
+                    const monthly = Number(g.monthlyContribution || 0);
+                    const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
+
+                    // Estimate completion
+                    let statusColor = 'var(--primary)';
+                    let projection = '';
+                    const remaining = target - current;
+                    if (remaining <= 0) {
+                        projection = '✅ Goal reached!';
+                        statusColor = 'var(--primary)';
+                    } else if (monthly > 0) {
+                        const monthsNeeded = Math.ceil(remaining / monthly);
+                        const estDate = new Date();
+                        estDate.setMonth(estDate.getMonth() + monthsNeeded);
+                        const estStr = estDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+                        if (g.deadline) {
+                            const deadlineDate = new Date(g.deadline + '-01');
+                            if (estDate <= deadlineDate) {
+                                projection = `✅ On track — est. ${estStr}`;
+                                statusColor = 'var(--primary)';
+                            } else {
+                                const shortfall = Math.round((estDate - deadlineDate) / (1000 * 60 * 60 * 24 * 30));
+                                projection = `⚠️ ${shortfall}mo late — est. ${estStr}`;
+                                statusColor = 'var(--danger)';
+                            }
+                        } else {
+                            projection = `Est. ${estStr} (${monthsNeeded}mo)`;
+                            statusColor = 'var(--text-muted)';
+                        }
+                    } else if (g.deadline) {
+                        projection = '⚠️ No monthly contribution set';
+                        statusColor = 'var(--warning)';
+                    }
+
+                    const onTrack = statusColor === 'var(--primary)';
+                    const late = statusColor === 'var(--danger)';
+                    const cardBorder = remaining <= 0 ? 'border-left:3px solid var(--primary)' :
+                                       late ? 'border-left:3px solid var(--danger)' : '';
+
                     return `
-                        <div class="savings-item">
+                        <div class="savings-item" style="${cardBorder}">
                             <div class="savings-item-header">
                                 <span class="savings-item-name">${escapeHtml(g.name)}</span>
                                 <div class="savings-item-actions">
@@ -1635,17 +1676,18 @@ function renderSavings() {
                             </div>
                             <div class="savings-progress">
                                 <div class="savings-progress-bar">
-                                    <div class="savings-progress-fill" style="width: ${pct}%"></div>
+                                    <div class="savings-progress-fill" style="width: ${pct}%;background:${statusColor}"></div>
                                 </div>
                                 <div class="savings-progress-text">
-                                    <span>${fmt(g.currentAmount)} saved</span>
+                                    <span>${fmt(current)} saved</span>
                                     <span>${Math.round(pct)}%</span>
                                 </div>
                             </div>
                             <div class="savings-item-details">
-                                Target: ${fmt(g.targetAmount)}
-                                ${g.monthlyContribution ? ` • ${fmt(g.monthlyContribution)}/mo` : ''}
+                                Target: ${fmt(target)}
+                                ${monthly ? ` • ${fmt(monthly)}/mo` : ''}
                                 ${g.deadline ? ` • By ${g.deadline}` : ''}
+                                ${projection ? `<br><span style="color:${statusColor};font-size:0.8rem">${projection}</span>` : ''}
                                 ${g.notes ? `<br>${escapeHtml(g.notes)}` : ''}
                             </div>
                         </div>`;
