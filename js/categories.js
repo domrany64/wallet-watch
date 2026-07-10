@@ -52,7 +52,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
         'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano',
-        'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg',
+        'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
         'HENRY COWELL REDW', 'OREGON COAST AQUARIUM', 'RECREATION.GOV',
         'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES'
     ],
