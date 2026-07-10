@@ -565,19 +565,6 @@ function renderDashboard() {
     const barClass = pct < 60 ? 'safe' : pct < 85 ? 'caution' : 'over';
     const overBudget = remaining < 0;
 
-    // If no settings, show setup prompt
-    if (!income) {
-        mainContent.innerHTML = `
-            ${monthNavHtml()}
-            <div class="empty-state">
-                <div class="emoji">⚙️</div>
-                <h2>Welcome! Let's set up your budget</h2>
-                <p>Click the gear icon above to set your monthly income and household members.</p>
-                <button class="btn btn-primary" onclick="document.getElementById('settingsOverlay').classList.add('active')">Open Settings</button>
-            </div>`;
-        return;
-    }
-
     // Per-spender breakdown (expenses minus refunds)
     const expenseTxns = txns.filter(t => t.txnType !== 'income');
     const spenderTotals = {};
