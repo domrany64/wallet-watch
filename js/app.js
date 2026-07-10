@@ -1691,8 +1691,14 @@ function renderSavings() {
                                         }
                                     }
                                     const dollarShort = Math.max(0, target - savedByDeadline);
-                                    projection = `⚠️ ${lateMo}mo late, ${fmt(dollarShort)} short — est. ${estStr}${apyLabel}`;
-                                    statusColor = 'var(--danger)';
+                                    if (dollarShort < 0.5) {
+                                        // Essentially on-time — integer month rounding artifact
+                                        projection = `✅ On track — est. ${estStr}${apyLabel}`;
+                                        statusColor = 'var(--primary)';
+                                    } else {
+                                        projection = `⚠️ ${lateMo}mo late, ${fmt(dollarShort)} short — est. ${estStr}${apyLabel}`;
+                                        statusColor = 'var(--danger)';
+                                    }
                                 }
                             } else {
                                 projection = `Est. ${estStr} (${monthsNeeded}mo)${apyLabel}`;
