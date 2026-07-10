@@ -54,7 +54,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     travel: [
         'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
         'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
-        'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'YOSEMITE', 'FLYING J', 'BERN',
+        'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'FLYING J', 'BERN',
         'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano', 'AIRBNB',
         'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
         'HENRY COWELL REDW', 'OREGON COAST AQUARIUM',  'SANTA CLARA',
@@ -62,7 +62,7 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'Luzern', 'BRIENZ', 'Alpnachstad', 'Menziken', 'Glattbrugg'
     ],
     camping: [
-        'RECREATION.GOV', 'MOUNT RAINIER'
+        'RECREATION.GOV', 'MOUNT RAINIER', 'YOSEMITE'
     ],
     education: ['SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
                 'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
