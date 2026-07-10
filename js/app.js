@@ -1626,38 +1626,73 @@ function renderSavings() {
                     const current = Number(g.currentAmount || 0);
                     const target = Number(g.targetAmount || 0);
                     const monthly = Number(g.monthlyContribution || 0);
+                    const apy = Number(g.expectedGrowth || 0);
                     const pct = target > 0 ? Math.min((current / target) * 100, 100) : 0;
 
-                    // Estimate completion
+                    // Estimate completion using compound growth if APY set
+                    // FV = PV*(1+r)^n + PMT*((1+r)^n - 1)/r   (r = monthly rate)
                     let statusColor = 'var(--primary)';
                     let projection = '';
                     const remaining = target - current;
+
+                    function monthsToReach() {
+                        if (remaining <= 0) return 0;
+                        if (apy > 0) {
+                            const r = apy / 100 / 12;
+                            // Find n where current*(1+r)^n + monthly*((1+r)^n-1)/r >= target
+                            for (let n = 1; n <= 600; n++) {
+                                const fv = current * Math.pow(1 + r, n) + (monthly > 0 ? monthly * (Math.pow(1 + r, n) - 1) / r : 0);
+                                if (fv >= target) return n;
+                            }
+                            return 601; // > 50 years
+                        } else {
+                            return monthly > 0 ? Math.ceil(remaining / monthly) : null;
+                        }
+                    }
+
                     if (remaining <= 0) {
                         projection = '✅ Goal reached!';
                         statusColor = 'var(--primary)';
-                    } else if (monthly > 0) {
-                        const monthsNeeded = Math.ceil(remaining / monthly);
-                        const estDate = new Date();
-                        estDate.setMonth(estDate.getMonth() + monthsNeeded);
-                        const estStr = estDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-
-                        if (g.deadline) {
-                            const deadlineDate = new Date(g.deadline);
-                            if (estDate <= deadlineDate) {
-                                projection = `✅ On track — est. ${estStr}`;
-                                statusColor = 'var(--primary)';
-                            } else {
-                                const shortfall = Math.round((estDate - deadlineDate) / (1000 * 60 * 60 * 24 * 30));
-                                projection = `⚠️ ${shortfall}mo late — est. ${estStr}`;
-                                statusColor = 'var(--danger)';
+                    } else {
+                        const monthsNeeded = monthsToReach();
+                        if (monthsNeeded === null) {
+                            if (g.deadline) {
+                                projection = '⚠️ No monthly contribution set';
+                                statusColor = 'var(--warning)';
                             }
                         } else {
-                            projection = `Est. ${estStr} (${monthsNeeded}mo)`;
-                            statusColor = 'var(--text-muted)';
+                            const estDate = new Date();
+                            estDate.setMonth(estDate.getMonth() + monthsNeeded);
+                            const estStr = estDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                            const apyLabel = apy > 0 ? ` @ ${apy}% APY` : '';
+
+                            if (g.deadline) {
+                                const deadlineDate = new Date(g.deadline);
+                                const deadlineMonths = Math.round((deadlineDate - new Date()) / (1000 * 60 * 60 * 24 * 30));
+                                if (estDate <= deadlineDate) {
+                                    projection = `✅ On track — est. ${estStr}${apyLabel}`;
+                                    statusColor = 'var(--primary)';
+                                } else {
+                                    const lateMo = Math.round((estDate - deadlineDate) / (1000 * 60 * 60 * 24 * 30));
+                                    // $ shortfall: how much would be saved by deadline vs target
+                                    let savedByDeadline = current;
+                                    if (deadlineMonths > 0) {
+                                        if (apy > 0) {
+                                            const r = apy / 100 / 12;
+                                            savedByDeadline = current * Math.pow(1 + r, deadlineMonths) + (monthly > 0 ? monthly * (Math.pow(1 + r, deadlineMonths) - 1) / r : 0);
+                                        } else {
+                                            savedByDeadline = current + monthly * deadlineMonths;
+                                        }
+                                    }
+                                    const dollarShort = Math.max(0, target - savedByDeadline);
+                                    projection = `⚠️ ${lateMo}mo late, ${fmt(dollarShort)} short — est. ${estStr}${apyLabel}`;
+                                    statusColor = 'var(--danger)';
+                                }
+                            } else {
+                                projection = `Est. ${estStr} (${monthsNeeded}mo)${apyLabel}`;
+                                statusColor = 'var(--text-muted)';
+                            }
                         }
-                    } else if (g.deadline) {
-                        projection = '⚠️ No monthly contribution set';
-                        statusColor = 'var(--warning)';
                     }
 
                     const onTrack = statusColor === 'var(--primary)';
@@ -1685,7 +1720,7 @@ function renderSavings() {
                             </div>
                             <div class="savings-item-details">
                                 Target: ${fmt(target)}
-                                ${monthly ? ` • ${fmt(monthly)}/mo` : ''}
+                                ${monthly ? ` • ${fmt(monthly)}/mo` : ''}${apy ? ` • ${apy}% APY` : ''}
                                 ${g.deadline ? ` • By ${g.deadline}` : ''}
                                 ${projection ? `<br><span style="color:${statusColor};font-size:0.8rem">${projection}</span>` : ''}
                                 ${g.notes ? `<br>${escapeHtml(g.notes)}` : ''}
@@ -1776,9 +1811,15 @@ function goalFormHtml(g = {}) {
                     <input type="date" id="gDeadline" value="${g.deadline || ''}">
                 </div>
             </div>
-            <div class="form-group">
-                <label for="gNotes">Notes</label>
-                <input type="text" id="gNotes" value="${escapeHtml(g.notes || '')}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gGrowth">Expected Growth (% APY)</label>
+                    <input type="number" id="gGrowth" min="0" max="100" step="0.1" value="${g.expectedGrowth || ''}" placeholder="e.g. 5 for 5%">
+                </div>
+                <div class="form-group">
+                    <label for="gNotes">Notes</label>
+                    <input type="text" id="gNotes" value="${escapeHtml(g.notes || '')}">
+                </div>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-secondary" onclick="window._hideModal()">Cancel</button>
@@ -1797,6 +1838,7 @@ window._addGoal = () => {
             currentAmount: parseFloat(document.getElementById('gCurrent').value) || 0,
             monthlyContribution: parseFloat(document.getElementById('gMonthly').value) || 0,
             deadline: document.getElementById('gDeadline').value || null,
+            expectedGrowth: parseFloat(document.getElementById('gGrowth').value) || 0,
             notes: document.getElementById('gNotes').value.trim(),
             createdAt: Date.now()
         };
@@ -1816,6 +1858,7 @@ window._editGoal = (id) => {
             currentAmount: parseFloat(document.getElementById('gCurrent').value) || 0,
             monthlyContribution: parseFloat(document.getElementById('gMonthly').value) || 0,
             deadline: document.getElementById('gDeadline').value || null,
+            expectedGrowth: parseFloat(document.getElementById('gGrowth').value) || 0,
             notes: document.getElementById('gNotes').value.trim()
         }).then(() => { hideModal(); showToast('Goal updated'); });
     });

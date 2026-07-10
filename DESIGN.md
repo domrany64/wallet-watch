@@ -77,6 +77,7 @@ WalletWatch is a single-page family budget and expense tracking app. It uses Fir
         targetAmount: 20000
         currentAmount: 12000
         monthlyContribution: 500
+        expectedGrowth: 5.0    // % APY, used in compound growth estimate (optional)
         deadline: "2027-06-01"
         notes: ""
         createdAt: 1720000000000
