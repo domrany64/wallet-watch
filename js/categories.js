@@ -3,85 +3,95 @@
 // Format: category -> list of description patterns (case-insensitive matching)
 
 export const CATEGORY_MAPPINGS_GROUPED = {
-    transport: [
-        'COSTCO GAS', 'ARCO', '76 -', 'SPEEDWAY', 'SHELL', 'CHEVRON',
-        'PARKING', 'KAADY CAR WASH', 'Transit', 'GARAGE', 'BEAVERTON NISSAN',
-        'BEAVERTON KIA', 'PARKMOBILE', 'TRAVELERS PER INSUR'
-    ],
-    groceries: [
-        'COSTCO WHSE', 'TRADER JOE', 'SAFEWAY', 'QFC',
-        'FRED-MEYER', 'WINCO', 'GROCERY OUTLET', 'WHOLEFDS', 'WHOLE FOODS',
-        'MARKET OF CHOICE', 'BAZAAR WORLD FOOD', 'BAZAAR FOOD MARKET',
-        'FRESH HALAL', 'ARIANA FOOD MARKET', 'ROSE INTERNATIONAL',
-        'UNIQUE INTERNATIONAL MAR', 'PERSIA FOODS', 'CHEFSTORE',
-        'BARBUR WORLD FOODS', 'BHAIS'
+    camping: [
+        'MOUNT RAINIER', 'RECREATION.GOV', 'YOSEMITE'
     ],
     dining: [
-        'MCDONALD', 'SUBWAY', 'PANDA EXPRESS', 'IN-N-OUT', 'JIMMY JOHN',
-        'CHIPOTLE', 'STARBUCKS', 'PEETS', 'SHAKE SHACK', 'DUTCH BROS', 'SOUL KOREAN',
-        'GYRO', 'CORNER BAKERY', 'CHENNAI MASALA', 'MIRABELLE BY ORPHEE',
-        'CHINESE GOURMET', 'PIZZA', 'RESTAURANT', 'BAKERY', 'GELATERIA',
-        'DONUTS', 'Clearwater', 'Hiyaku Buffet', 'NONNA EMILIA', 'PORTLAND ROASTING',
-        'MAGIC TREATS', 'VEGGIE GRILL', 'DARVISH KITCHEN', 'LE MACARON',
-        'LA DEVOZIONE', 'MADE IN NEW YORK P', 'GRASSA 6', 'AVA ROASTERIA', 'PANERA',
-        'DAVESHOTCHICKEN', 'SALT & STRAW', 'PARIS BAGUETTE', 'STRIPES',
-        'PHO TANGO', 'GENGIS KHAN', 'Grill', 'BASKIN', 'CHOCOLATE', 'Fast food',
-        'BIGTOWNHERO', 'EATALY', 'BRAGANZA TEA', 'BUFFET', 'JAMBA JUICE', 'SIZZLE PIE',
-        'PHILLY CHEESE', 'DOMINO\'S', 'PAPA JOHN', 'BURGER KING', 'TACO BELL',
-        'HOLIDAY MOKA', 'CHURROS', 'Pizzeria', 'IHOP', 'LEVANT', 'COFFEE',
-        'CAFE', 'ICE CREAM', 'KONA ICE', 'THE MELT', 'BOBADOCHI', 'AUNTIE ANNES',
-        'CHA CHA CHA Taqueria', 'ARTISAN BAKE', 'FOOD', 'Haida Sandwich'
-    ],
-    shopping: [
-        'AMAZON', 'TARGET', 'TARGET.COM', 'MARSHALLS', 'HOMEGOODS', 'THE CHILDRENS PLACE',
-        'GOODWILL', 'ROSS STORES', 'BURLINGTON', 'JCPENNEY', 'MACYS', 'GAP', 'VICTORIAS SECRET',
-        'NORDSTROM', 'H&M', 'CLAIRE', 'DOLLAR TREE', 'KOHL', 'TATCHA', 'Muji', 'LANCOME',
-        'BATH AND BODY', 'SEPHORA', 'ULTA', 'UPS STORE', 'FEDEX', 'WWW COSTCO COM',
-        'CUTE LIL SHOP', 'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'SHISEIDO', 'DERMSTORE',
-        'WAL-MART', 'Nike', 'JANELLE JAMES', 'CARTERS', 'GAP.COM', 'SALLY BEAUTY', 'ZARA',
-        'PICCOLO MONDO', 'IKEA', 'WAYFAIR', 'HENNA', 'Lush', 'Estee Lauder', 'HAIR SALO', 'Columbia'
-    ],
-    housing: [
-        'HOME DEPOT', 'RODDA PAINT', 'ROCKET MORTGAGE', 'SPRINGVILLE TOWNHO', 'COOPERNSM',
-        'ADT SECURITY'
-    ],
-    healthcare: [
-        'KP NW DENTAL', 'KP DENTAL', 'KAISER DENTAL', 'KP NW RX',
-        'WALGREENS', 'CVS/PHARMACY', 'KP WESTSIDE', 'ALIGN & SHINE',
-        'BOLLYWOOD EYEBROW', 'LUZ LOUNGE', 'LICE CLIN', 'ACUPUNCTURE',
-        'HEALTHCARE', 'PHARMACY', 'LCA Portland', 'HODA PARVIN', 'NUTRAFOL',
-        'guangmei Yang', 'CHIROPRACTI'
-    ],
-    travel: [
-        'QATAR AIR', 'SOUTHWES', 'TURKISH AIR', 'OVAGO AIR', 'EXPEDIA',
-        'HOTEL', 'GREAT WOLF', 'RITZ CARLTON', 'TRENITALIA', 'SEA AIRPORT',
-        'Las Vegas', 'PDX AIRPORT', 'Hofstetten', 'FLYING J', 'BERN',
-        'ZURICH', 'VENEZIA', 'BOLOGNA', 'VERONA', 'FIRENZE', 'Lugano', 'AIRBNB',
-        'MILANO', 'Interlaken', 'Wengen', 'Grindelwald', 'Engelberg', 'EMIRATES',
-        'HENRY COWELL REDW', 'OREGON COAST AQUARIUM',  'SANTA CLARA',
-        'SAN JOSE', 'Santa Cruz', 'ALLIANZ TRAVEL', 'Delta Cars', 'DELTA AIR LINES',
-        'Luzern', 'BRIENZ', 'Alpnachstad', 'Menziken', 'Glattbrugg'
-    ],
-    camping: [
-        'RECREATION.GOV', 'MOUNT RAINIER', 'YOSEMITE'
-    ],
-    education: [
-        'SCHOLASTIC', 'BEAVERTON SD', 'KRAMERBOOKS', 'BOOKSTORE', 'WINTERHAWKS ICE',
-        'LEARNNOVIN', 'FARHAD SHARIFI', 'COMM COLLEGE', 'MATHNASIUM', 'FERDOWSI FARSI',
-        'FABULOUS'
-    ],
-    entertainment: [
-        'MYSTERY SPOT', 'TECH INTERACTIVE', 'SUPERPLAY', '24 HOUR FITNESS', 'SKY ZONE',
-        'MARION ACRES', 'CRYSTAL SPRINGS', 'TUALATIN HILLS PARK', 'REGIONAL PARK BLUE',
-        'TRISKELEE FARM', 'Oregon Museum', 'OMSI', 'Pittock Mansion', 'woodenshoe.com',
-        'G2A', 'GAMES', 'GAMIVO', 'Museum', 'GAMEROW'
+        'ARTISAN BAKE', 'AUNTIE ANNES', 'AVA ROASTERIA', 'BAKERY', 'BASKIN',
+        'BIGTOWNHERO', 'BOBADOCHI', 'BRAGANZA TEA', 'BUFFET', 'BURGER KING',
+        'CAFE', 'CHA CHA CHA Taqueria', 'CHENNAI MASALA', 'CHINESE GOURMET', 'CHIPOTLE',
+        'CHOCOLATE', 'CHURROS', 'Clearwater', 'COFFEE', 'CORNER BAKERY',
+        'DARVISH KITCHEN', 'DAVESHOTCHICKEN', 'DOMINO\'S', 'DONUTS', 'DUTCH BROS',
+        'EATALY', 'Fast food', 'FOOD', 'GELATERIA', 'GENGIS KHAN',
+        'GRASSA 6', 'Grill', 'GYRO', 'Haida Sandwich', 'Hiyaku Buffet',
+        'HOLIDAY MOKA', 'ICE CREAM', 'IHOP', 'IN-N-OUT', 'JAMBA JUICE',
+        'JIMMY JOHN', 'KONA ICE', 'LA DEVOZIONE', 'LE MACARON', 'LEVANT',
+        'MADE IN NEW YORK P', 'MAGIC TREATS', 'MCDONALD', 'MIRABELLE BY ORPHEE', 'NONNA EMILIA',
+        'PANDA EXPRESS', 'PANERA', 'PAPA JOHN', 'PARIS BAGUETTE', 'PEETS',
+        'PHO TANGO', 'PHILLY CHEESE', 'PIZZA', 'Pizzeria', 'PORTLAND ROASTING',
+        'RESTAURANT', 'SALT & STRAW', 'SHAKE SHACK', 'SIZZLE PIE', 'SOUL KOREAN',
+        'STARBUCKS', 'STRIPES', 'SUBWAY', 'TACO BELL', 'THE MELT',
+        'VEGGIE GRILL'
     ],
     donation: [
         'SIMA NASERI'
     ],
+    education: [
+        'BEAVERTON SD', 'BOOKSTORE', 'COMM COLLEGE', 'FABULOUS', 'FARHAD SHARIFI',
+        'FERDOWSI FARSI', 'KRAMERBOOKS', 'LEARNNOVIN', 'MATHNASIUM',
+        'SCHOLASTIC', 'WINTERHAWKS ICE'
+    ],
+    entertainment: [
+        '24 HOUR FITNESS', 'CRYSTAL SPRINGS', 'G2A', 'GAMEROW', 'GAMIVO',
+        'GAMES', 'MARION ACRES', 'Museum', 'MYSTERY SPOT', 'OMSI',
+        'Oregon Museum', 'Pittock Mansion', 'REGIONAL PARK BLUE', 'SKY ZONE', 'SUPERPLAY',
+        'TECH INTERACTIVE', 'TRISKELEE FARM', 'TUALATIN HILLS PARK', 'woodenshoe.com'
+    ],
+    fine: [
+        'Overdraft'
+    ],
+    groceries: [
+        'ARIANA FOOD MARKET', 'BARBUR WORLD FOODS', 'BAZAAR FOOD MARKET', 'BAZAAR WORLD FOOD',
+        'BHAIS', 'CHEFSTORE', 'COSTCO WHSE', 'FRED-MEYER', 'FRESH HALAL',
+        'GROCERY OUTLET', 'MARKET OF CHOICE', 'PERSIA FOODS', 'QFC',
+        'ROSE INTERNATIONAL', 'SAFEWAY', 'TRADER JOE', 'UNIQUE INTERNATIONAL MAR',
+        'WHOLE FOODS', 'WHOLEFDS', 'WINCO'
+    ],
+    healthcare: [
+        'ACUPUNCTURE', 'ALIGN & SHINE', 'BOLLYWOOD EYEBROW', 'CHIROPRACTI',
+        'CVS/PHARMACY', 'guangmei Yang', 'HEALTHCARE', 'HODA PARVIN',
+        'KAISER DENTAL', 'KP DENTAL', 'KP NW DENTAL', 'KP NW RX',
+        'KP WESTSIDE', 'LCA Portland', 'LICE CLIN', 'LUZ LOUNGE',
+        'NUTRAFOL', 'PHARMACY', 'WALGREENS'
+    ],
+    housing: [
+        'ADT SECURITY', 'COOPERNSM', 'HOME DEPOT', 'ROCKET MORTGAGE',
+        'RODDA PAINT', 'SPRINGVILLE TOWNHO'
+    ],
+    shopping: [
+        'AMAZON', 'BATH AND BODY', 'BURLINGTON', 'CARTERS', 'CLAIRE',
+        'Columbia', 'CUTE LIL SHOP', 'DERMSTORE', 'DOLLAR TREE', 'Estee Lauder',
+        'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'FEDEX', 'GAP', 'GAP.COM',
+        'GOODWILL', 'H&M', 'HAIR SALO', 'HENNA', 'HOMEGOODS',
+        'IKEA', 'JANELLE JAMES', 'JCPENNEY', 'KOHL', 'LANCOME',
+        'Lush', 'MACYS', 'MARSHALLS', 'Muji', 'Nike',
+        'NORDSTROM', 'PICCOLO MONDO', 'ROSS STORES', 'SALLY BEAUTY', 'SEPHORA',
+        'SHISEIDO', 'TARGET', 'TARGET.COM', 'TATCHA', 'THE CHILDRENS PLACE',
+        'ULTA', 'UPS STORE', 'VICTORIAS SECRET', 'WAL-MART', 'WAYFAIR',
+        'WWW COSTCO COM', 'ZARA'
+    ],
+    subscription: [
+        'MONTHLY MAINTENANCE FEE'
+    ],
+    transport: [
+        '76 -', 'ARCO', 'BEAVERTON KIA', 'BEAVERTON NISSAN', 'CHEVRON',
+        'COSTCO GAS', 'GARAGE', 'KAADY CAR WASH', 'PARKMOBILE', 'PARKING',
+        'SHELL', 'SPEEDWAY', 'Transit', 'TRAVELERS PER INSUR'
+    ],
+    travel: [
+        'AIRBNB', 'ALLIANZ TRAVEL', 'Alpnachstad', 'BERN', 'BOLOGNA',
+        'BRIENZ', 'Delta Cars', 'DELTA AIR LINES', 'EMIRATES', 'Engelberg',
+        'EXPEDIA', 'FIRENZE', 'FLYING J', 'Glattbrugg', 'GREAT WOLF',
+        'Grindelwald', 'HENRY COWELL REDW', 'Hofstetten', 'HOTEL', 'Interlaken',
+        'Las Vegas', 'Lugano', 'Luzern', 'Menziken', 'MILANO',
+        'OREGON COAST AQUARIUM', 'OVAGO AIR', 'PDX AIRPORT', 'QATAR AIR', 'RITZ CARLTON',
+        'SAN JOSE', 'SANTA CLARA', 'Santa Cruz', 'SEA AIRPORT', 'SOUTHWES',
+        'TRENITALIA', 'TURKISH AIR', 'VENEZIA', 'VERONA', 'Wengen',
+        'ZURICH'
+    ],
     utilities: [
-        'ZIPLY FIBER', 'PORTLAND GENERAL', 'NORTHWEST NATURA', 'TUALATIN VALLEY',
-        'WASTE MANAGEMENT', 'GOOGLE *FI', 'Google FI', 'GOOGLE*FI', 'WM.COM'
+        'GOOGLE *FI', 'GOOGLE*FI', 'Google FI', 'NORTHWEST NATURA', 'PORTLAND GENERAL',
+        'TUALATIN VALLEY', 'WASTE MANAGEMENT', 'WM.COM', 'ZIPLY FIBER'
     ],
 };
 
