@@ -77,6 +77,8 @@
         </div>
         <div class="controls">
             <button class="btn-primary" id="applyBtn" disabled>Apply Selected Changes</button>
+            <button class="btn-secondary" id="selectNoneBtn" style="display:none">Select None</button>
+            <button class="btn-secondary" id="selectAllBtn" style="display:none">Select All</button>
             <button class="btn-secondary" id="clearBtn">Clear</button>
             <span id="applyStatus" style="color:#94a3b8;font-size:0.85rem"></span>
         </div>
@@ -192,6 +194,8 @@
 
             document.getElementById('results').style.display = '';
             document.getElementById('applyBtn').disabled = changes.length === 0;
+            document.getElementById('selectNoneBtn').style.display = changes.length > 0 ? '' : 'none';
+            document.getElementById('selectAllBtn').style.display = 'none';
             document.getElementById('statusText').textContent = `Scanned ${Object.keys(transactions).length} transactions`;
         });
 
@@ -202,6 +206,26 @@
                 cb.checked = checked;
                 changes[cb.dataset.idx].selected = checked;
             });
+        });
+
+        document.getElementById('selectNoneBtn').addEventListener('click', () => {
+            document.querySelectorAll('.change-check').forEach(cb => {
+                cb.checked = false;
+                changes[cb.dataset.idx].selected = false;
+            });
+            document.getElementById('selectAll').checked = false;
+            document.getElementById('selectNoneBtn').style.display = 'none';
+            document.getElementById('selectAllBtn').style.display = '';
+        });
+
+        document.getElementById('selectAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.change-check').forEach(cb => {
+                cb.checked = true;
+                changes[cb.dataset.idx].selected = true;
+            });
+            document.getElementById('selectAll').checked = true;
+            document.getElementById('selectAllBtn').style.display = 'none';
+            document.getElementById('selectNoneBtn').style.display = '';
         });
 
         document.getElementById('previewBody').addEventListener('change', (e) => {

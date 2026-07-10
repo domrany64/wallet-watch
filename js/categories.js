@@ -33,9 +33,9 @@ export const CATEGORY_MAPPINGS_GROUPED = {
     ],
     entertainment: [
         '24 HOUR FITNESS', 'CRYSTAL SPRINGS', 'G2A', 'GAMEROW', 'GAMIVO',
-        'GAMES', 'MARION ACRES', 'Museum', 'OMSI',
-        'Oregon Museum', 'Pittock Mansion', 'REGIONAL PARK BLUE', 'SKY ZONE', 'SUPERPLAY',
-        'TECH INTERACTIVE', 'TRISKELEE FARM', 'TUALATIN HILLS PARK', 'woodenshoe.com'
+        'GAMES', 'MARION ACRES', 'Museum', 'OMSI', 'Oregon Museum', 'Pittock Mansion',
+        'REGIONAL PARK BLUE', 'SKY ZONE', 'SUPERPLAY', 'TECH INTERACTIVE',
+        'TRISKELEE FARM', 'TUALATIN HILLS PARK', 'woodenshoe.com'
     ],
     fine: [
         'Overdraft'
@@ -64,8 +64,8 @@ export const CATEGORY_MAPPINGS_GROUPED = {
         'FAMOUSFOOTWEAR', 'FAMOUS FOOTWEAR', 'FEDEX', 'GAP', 'GAP.COM',
         'GOODWILL', 'H&M', 'HAIR SALO', 'HENNA', 'HOMEGOODS',
         'IKEA', 'JANELLE JAMES', 'JCPENNEY', 'KOHL', 'LANCOME',
-        'Lush', 'MACYS', 'MARSHALLS', 'Muji', 'Nike',
-        'NORDSTROM', 'PICCOLO MONDO', 'ROSS STORES', 'SALLY BEAUTY', 'SEPHORA',
+        'Lush', 'MACYS', 'MARSHALLS', 'Muji', 'Nike', 'NORDSTROM',
+        'PICCOLO MONDO', 'ROSS STORES', 'SALLY BEAUTY', 'SEPHORA',
         'SHISEIDO', 'TARGET', 'TARGET.COM', 'TATCHA', 'THE CHILDRENS PLACE',
         'ULTA', 'UPS STORE', 'VICTORIAS SECRET', 'WAL-MART', 'WAYFAIR',
         'WWW COSTCO COM', 'ZARA'
