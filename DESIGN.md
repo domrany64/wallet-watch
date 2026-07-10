@@ -154,6 +154,13 @@ Credit card presets (Chase, Citi, Amex, Gap, Nordstrom) have `creditCard: true` 
 
 Dedup key: `date|amount|description|txnType|cardId`. Same transaction on different cards = not a duplicate. Count-based: if DB has 1 matching row and CSV has 2, second one imports (handles real duplicates like two dental copays same day).
 
+### Transfer Detection Patterns
+
+Auto-skipped as inter-account transfers (not spending):
+- Credit card payments: `citi card`, `chase credit`, `barclaycard`, `amex epayment`, `credit crd`
+- Inter-bank transfers: `real time payment`, `rtp rec`, `rtp-`, `funds tran`, `internet trf`, `onpoint ccu`, `paypal transfer`
+- Payment descriptions: `payment thank`, `online payment`, `autopay`, `bill pay`, `pymt`
+
 ### Auto-Categorization
 
 Transactions are auto-categorized by matching description text against patterns:
