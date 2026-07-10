@@ -247,6 +247,13 @@ When a user edits a transaction's category in the app, a prompt offers to save t
 ### Savings View
 - Savings goals with progress bars (current/target)
 - Investment holdings table (ticker, shares, cost, current value, gain/loss)
+- **Refresh Prices** button fetches live prices for all tickers via Yahoo Finance (unofficial API via allorigins.win CORS proxy). No API key required. May be unavailable if Yahoo rate-limits.
+
+### Future: API key-based price fetching
+For more reliable quotes, replace Yahoo with a keyed service. Store key in Firebase `settings.stockApiKey`. Options:
+- **Alpha Vantage** — `https://www.alphavantage.co` — 25 req/day free, key: `GLOBAL_QUOTE` endpoint
+- **Finnhub** — `https://finnhub.io` — 60 req/min free, key: `/quote` endpoint
+- **Financial Modeling Prep** — `https://financialmodelingprep.com` — 250 req/day free
 - Totals: total saved, total invested, combined
 
 ---

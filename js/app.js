@@ -1655,7 +1655,10 @@ function renderSavings() {
         <!-- Investments -->
         <div class="section-header" style="margin-top: 2rem">
             <h2 class="section-title">Investments</h2>
-            <button class="btn btn-primary btn-sm" onclick="window._addInvestment()">+ Add</button>
+            <div style="display:flex;gap:0.5rem">
+                ${investments.length > 0 ? `<button class="btn btn-sm btn-secondary" id="refreshPricesBtn" onclick="window._refreshPrices()">🔄 Refresh Prices</button>` : ''}
+                <button class="btn btn-primary btn-sm" onclick="window._addInvestment()">+ Add</button>
+            </div>
         </div>
 
         ${investments.length === 0 ? `
@@ -1819,6 +1822,47 @@ function investFormHtml(inv = {}) {
             </div>
         </form>`;
 }
+
+        </form>`;
+}
+
+window._refreshPrices = async () => {
+    const investments = Object.entries(data.investments || {});
+    const tickers = [...new Set(investments.map(([, inv]) => inv.ticker).filter(Boolean))];
+    if (tickers.length === 0) { showToast('No tickers to refresh'); return; }
+
+    const btn = document.getElementById('refreshPricesBtn');
+    if (btn) { btn.textContent = '⏳ Fetching...'; btn.disabled = true; }
+
+    let updated = 0;
+    for (const ticker of tickers) {
+        try {
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=1d`;
+            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const res = await fetch(proxy);
+            const json = await res.json();
+            const parsed = JSON.parse(json.contents);
+            const price = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
+            if (!price) continue;
+
+            // Update all investments with this ticker
+            const updates = {};
+            investments.forEach(([id, inv]) => {
+                if (inv.ticker === ticker) {
+                    updates[`households/${currentUser.uid}/investments/${id}/currentValue`] = Math.round(price * 100) / 100;
+                    updates[`households/${currentUser.uid}/investments/${id}/updatedAt`] = Date.now();
+                }
+            });
+            await update(ref(db), updates);
+            updated++;
+        } catch (err) {
+            console.warn(`Failed to fetch ${ticker}:`, err.message);
+        }
+    }
+
+    showToast(updated > 0 ? `Updated ${updated} of ${tickers.length} tickers` : 'Failed to fetch prices (Yahoo may be unavailable)');
+    handleRoute();
+};
 
 window._addInvestment = () => {
     showModal('Add Investment', investFormHtml());
