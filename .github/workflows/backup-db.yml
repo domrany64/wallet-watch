@@ -26,23 +26,17 @@ jobs:
           mkdir -p backups
 
           # Get OAuth2 access token from service account key
-          ACCESS_TOKEN=$(python3 - <<'EOF'
-import json, sys, os
+          python3 -c "
+import json, os
 from google.oauth2 import service_account
 import google.auth.transport.requests
-
 sa_key = json.loads(os.environ['FIREBASE_SA_KEY'])
-creds = service_account.Credentials.from_service_account_info(
-    sa_key,
-    scopes=[
-        'https://www.googleapis.com/auth/firebase.database',
-        'https://www.googleapis.com/auth/userinfo.email'
-    ]
-)
+creds = service_account.Credentials.from_service_account_info(sa_key, scopes=['https://www.googleapis.com/auth/firebase.database','https://www.googleapis.com/auth/userinfo.email'])
 creds.refresh(google.auth.transport.requests.Request())
 print(creds.token)
-EOF
-)
+" > /tmp/access_token.txt
+
+          ACCESS_TOKEN=$(cat /tmp/access_token.txt)
 
           # Download database using access token
           HTTP_STATUS=$(curl -s -w "%{http_code}" \
@@ -66,7 +60,7 @@ EOF
             -pass pass:"${BACKUP_PASSWORD}"
 
           # Clean up plaintext
-          rm -f /tmp/backup_raw.json
+          rm -f /tmp/backup_raw.json /tmp/access_token.txt
 
       - name: Remove old backups (keep last 10)
         run: |
