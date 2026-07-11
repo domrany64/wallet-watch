@@ -21,7 +21,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SA_KEY }}
           token_format: access_token
-          scopes: https://www.googleapis.com/auth/firebase.database,https://www.googleapis.com/auth/userinfo.email
+          access_token_scopes: https://www.googleapis.com/auth/firebase.database,https://www.googleapis.com/auth/userinfo.email
 
       - name: Download and encrypt database backup
         env:
