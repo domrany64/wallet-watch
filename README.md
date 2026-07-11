@@ -74,6 +74,25 @@ Apply these rules in your Firebase Console → Realtime Database → Rules:
 5. Copy your Firebase config and update `js/app.js` (the `firebaseConfig` object)
 6. Deploy to GitHub Pages or open `index.html` locally
 
+## GitHub Actions Backup Setup
+
+The weekly encrypted backup requires 3 repository secrets. Go to:
+**GitHub → your repo → Settings → Secrets and variables → Actions → Repository secrets → New repository secret**
+
+| Secret name | Value |
+|---|---|
+| `FIREBASE_DB_URL` | `https://wallet-watch-247f2-default-rtdb.firebaseio.com` |
+| `FIREBASE_AUTH_TOKEN` | Firebase Database legacy secret (see below) |
+| `BACKUP_PASSWORD` | Any password you choose — required to decrypt backups |
+
+**To get `FIREBASE_AUTH_TOKEN`:**
+1. Go to [console.firebase.google.com](https://console.firebase.google.com) → your project
+2. Click ⚙️ → **Project settings** → **Service accounts** tab
+3. Scroll to **Database secrets** → click **Show** → copy the value
+
+Once secrets are set, go to **Actions → Backup Firebase DB (Encrypted) → Run workflow** to test.
+Backups are stored as AES-256-CBC encrypted `.enc` files in the `backups/` folder — unreadable without your `BACKUP_PASSWORD`.
+
 ## Tools
 
 - **Helpers page:** [/helpers/](https://domrany64.github.io/wallet-watch/helpers/) — Index of all helper tools
