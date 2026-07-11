@@ -76,19 +76,19 @@ Apply these rules in your Firebase Console → Realtime Database → Rules:
 
 ## GitHub Actions Backup Setup
 
-The weekly encrypted backup requires 3 repository secrets. Go to:
+The weekly encrypted backup requires 2 repository secrets. Go to:
 **GitHub → your repo → Settings → Secrets and variables → Actions → Repository secrets → New repository secret**
 
 | Secret name | Value |
 |---|---|
-| `FIREBASE_DB_URL` | `https://wallet-watch-247f2-default-rtdb.firebaseio.com` |
-| `FIREBASE_AUTH_TOKEN` | Firebase Database legacy secret (see below) |
-| `BACKUP_PASSWORD` | Any password you choose — required to decrypt backups |
+| `FIREBASE_SA_KEY` | Full contents of the service account JSON key file (see below) |
+| `BACKUP_PASSWORD` | Any password you choose — required to decrypt backups later |
 
-**To get `FIREBASE_AUTH_TOKEN`:**
+**To get `FIREBASE_SA_KEY`:**
 1. Go to [console.firebase.google.com](https://console.firebase.google.com) → your project
 2. Click ⚙️ → **Project settings** → **Service accounts** tab
-3. Scroll to **Database secrets** → click **Show** → copy the value
+3. Click **"Generate new private key"** → confirm → a JSON file downloads
+4. Open the JSON file, copy its **entire contents** and paste as the secret value
 
 Once secrets are set, go to **Actions → Backup Firebase DB (Encrypted) → Run workflow** to test.
 Backups are stored as AES-256-CBC encrypted `.enc` files in the `backups/` folder — unreadable without your `BACKUP_PASSWORD`.

@@ -15,27 +15,56 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Python dependencies
+        run: pip install google-auth requests --quiet
+
       - name: Download and encrypt database backup
         env:
-          FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
-          FIREBASE_AUTH_TOKEN: ${{ secrets.FIREBASE_AUTH_TOKEN }}
+          FIREBASE_SA_KEY: ${{ secrets.FIREBASE_SA_KEY }}
           BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
         run: |
           mkdir -p backups
-          # Download database with auth token
-          HTTP_STATUS=$(curl -sf -w "%{http_code}" "${FIREBASE_DB_URL}/households.json?auth=${FIREBASE_AUTH_TOKEN}" -o /tmp/backup_raw.json 2>/tmp/curl_err.txt || true)
-          if [ ! -s /tmp/backup_raw.json ]; then
-            echo "ERROR: curl failed. HTTP status: ${HTTP_STATUS}"
-            cat /tmp/curl_err.txt || true
+
+          # Get OAuth2 access token from service account key
+          ACCESS_TOKEN=$(python3 - <<'EOF'
+import json, sys, os
+from google.oauth2 import service_account
+import google.auth.transport.requests
+
+sa_key = json.loads(os.environ['FIREBASE_SA_KEY'])
+creds = service_account.Credentials.from_service_account_info(
+    sa_key,
+    scopes=[
+        'https://www.googleapis.com/auth/firebase.database',
+        'https://www.googleapis.com/auth/userinfo.email'
+    ]
+)
+creds.refresh(google.auth.transport.requests.Request())
+print(creds.token)
+EOF
+)
+
+          # Download database using access token
+          HTTP_STATUS=$(curl -s -w "%{http_code}" \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            "https://wallet-watch-247f2-default-rtdb.firebaseio.com/households.json" \
+            -o /tmp/backup_raw.json)
+
+          if [ "$HTTP_STATUS" != "200" ] || [ ! -s /tmp/backup_raw.json ]; then
+            echo "ERROR: Download failed. HTTP status: ${HTTP_STATUS}"
+            cat /tmp/backup_raw.json || true
             exit 1
           fi
-          # Verify it's valid JSON
+
+          # Verify valid JSON
           python3 -m json.tool /tmp/backup_raw.json > /dev/null
+
           # Encrypt with AES-256-CBC using PBKDF2 key derivation
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
             -in /tmp/backup_raw.json \
             -out "backups/backup_$(date +%Y%m%d_%H%M%S).json.enc" \
             -pass pass:"${BACKUP_PASSWORD}"
+
           # Clean up plaintext
           rm -f /tmp/backup_raw.json
 
