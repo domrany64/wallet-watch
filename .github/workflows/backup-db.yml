@@ -23,7 +23,12 @@ jobs:
         run: |
           mkdir -p backups
           # Download database with auth token
-          curl -sf "${FIREBASE_DB_URL}/households.json?auth=${FIREBASE_AUTH_TOKEN}" -o /tmp/backup_raw.json
+          HTTP_STATUS=$(curl -sf -w "%{http_code}" "${FIREBASE_DB_URL}/households.json?auth=${FIREBASE_AUTH_TOKEN}" -o /tmp/backup_raw.json 2>/tmp/curl_err.txt || true)
+          if [ ! -s /tmp/backup_raw.json ]; then
+            echo "ERROR: curl failed. HTTP status: ${HTTP_STATUS}"
+            cat /tmp/curl_err.txt || true
+            exit 1
+          fi
           # Verify it's valid JSON
           python3 -m json.tool /tmp/backup_raw.json > /dev/null
           # Encrypt with AES-256-CBC using PBKDF2 key derivation
