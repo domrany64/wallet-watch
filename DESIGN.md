@@ -255,13 +255,10 @@ When a user edits a transaction's category in the app, a prompt offers to save t
   - APY field accepts any decimal precision
 - Investment holdings table (ticker, shares, avg cost, current price, total value, gain/loss)
   - Avg cost and current price shown at full precision (not rounded)
-  - **Refresh Prices** button fetches live prices for all tickers via Yahoo Finance (unofficial API via allorigins.win CORS proxy). No API key required. May be unavailable if Yahoo rate-limits. Log modal shows per-ticker status.
+  - **Refresh Prices** tries Yahoo query1 through AllOrigins JSON, then query2 through AllOrigins raw. Each request has an 8-second timeout; failed routes are logged. Corsproxy.io was removed because unauthenticated requests return HTTP 401.
+  - Optional independent fallback: Finnhub `/api/v1/quote` using `settings.stockApiKey` and its documented `token` query parameter. Configure through the refresh log's **Configure Finnhub Fallback** button; the key is saved under the authenticated user's settings, never committed to source.
+  - Only finite positive numeric quotes are saved, without rounding. Failed/unsupported quotes leave the previous value and timestamp unchanged. Logs identify the successful provider. Finnhub coverage, delays, and limits depend on the user's plan; client-side API keys remain visible to that user's browser.
 
-### Future: API key-based price fetching
-For more reliable quotes, replace Yahoo with a keyed service. Store key in Firebase `settings.stockApiKey`. Options:
-- **Alpha Vantage** — `https://www.alphavantage.co` — 25 req/day free, key: `GLOBAL_QUOTE` endpoint
-- **Finnhub** — `https://finnhub.io` — 60 req/min free, key: `/quote` endpoint
-- **Financial Modeling Prep** — `https://financialmodelingprep.com` — 250 req/day free
 - Totals: total saved, total invested, combined
 
 ---

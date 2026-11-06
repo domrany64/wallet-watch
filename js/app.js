@@ -1958,6 +1958,7 @@ window._refreshPrices = async () => {
                 <div style="color:var(--text-muted)">Starting fetch for: ${tickers.join(', ')}</div>
             </div>
             <div class="form-actions" style="margin-top:1rem">
+                <button class="btn btn-secondary" onclick="window._setQuoteApiKey()">Configure Finnhub Fallback</button>
                 <button class="btn btn-secondary" onclick="window._hideModal()">Close</button>
             </div>
         </div>
@@ -1965,7 +1966,7 @@ window._refreshPrices = async () => {
 
     const log = document.getElementById('priceLog');
     const addLog = (msg, color = 'var(--text-muted)') => {
-        if (log) log.innerHTML += `<div style="color:${color}">${msg}</div>`;
+        if (log) log.innerHTML += `<div style="color:${color}">${escapeHtml(msg)}</div>`;
         if (log) log.scrollTop = log.scrollHeight;
     };
 
@@ -1977,33 +1978,54 @@ window._refreshPrices = async () => {
             // Try multiple CORS proxies in order
             const proxies = [
                 `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(yahooUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl.replace('query1.', 'query2.'))}`,
             ];
 
             let price = null;
-            for (const proxy of proxies) {
+            let source = 'Yahoo Finance';
+            for (const [index, proxy] of proxies.entries()) {
                 try {
                     const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-                    if (!res.ok) continue;
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     const json = await res.json();
                     const raw = json.contents || json;
                     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
                     const p = parsed?.chart?.result?.[0]?.meta?.regularMarketPrice;
-                    if (p) { price = p; break; }
-                } catch (_) { /* try next proxy */ }
+                    if (typeof p !== 'number' || !Number.isFinite(p) || p <= 0) throw new Error('No valid quote');
+                    price = p;
+                    break;
+                } catch (err) {
+                    addLog(`Yahoo route ${index + 1}: ${err.name === 'TimeoutError' ? 'timed out' : err.message}`, 'var(--warning)');
+                }
+            }
+
+            const apiKey = data.settings?.stockApiKey;
+            if (price === null && apiKey) {
+                try {
+                    const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(ticker.trim().toUpperCase())}&token=${encodeURIComponent(apiKey)}`, {
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const quote = await res.json();
+                    if (typeof quote.c !== 'number' || !Number.isFinite(quote.c) || quote.c <= 0) throw new Error('No valid quote');
+                    price = quote.c;
+                    source = 'Finnhub';
+                } catch (err) {
+                    addLog(`Finnhub: ${err.name === 'TimeoutError' ? 'timed out' : err.message}`, 'var(--warning)');
+                }
             }
 
             if (!price) {
-                addLog(`✗ ${ticker}: all proxies failed or no price returned`, 'var(--warning)');
+                addLog(`✗ ${ticker}: quote unavailable; saved price unchanged.${apiKey ? '' : ' Configure Finnhub fallback to bypass Yahoo failures.'}`, 'var(--warning)');
                 continue;
             }
 
-            addLog(`✓ ${ticker}: $${price}`, 'var(--primary)');
+            addLog(`✓ ${ticker}: $${price} (${source})`, 'var(--primary)');
 
             const updates = {};
             investments.forEach(([id, inv]) => {
                 if (inv.ticker === ticker) {
-                    updates[`households/${currentUser.uid}/investments/${id}/currentValue`] = Math.round(price * 10000) / 10000;
+                    updates[`households/${currentUser.uid}/investments/${id}/currentValue`] = price;
                     updates[`households/${currentUser.uid}/investments/${id}/updatedAt`] = Date.now();
                 }
             });
@@ -2017,6 +2039,33 @@ window._refreshPrices = async () => {
     addLog(`— Done: ${updated} of ${tickers.length} updated —`);
     if (btn) { btn.textContent = '🔄 Refresh Prices'; btn.disabled = false; }
     handleRoute();
+};
+
+window._setQuoteApiKey = () => {
+    showModal('Finnhub Fallback', `
+        <form id="quoteApiForm" class="modal-form">
+            <div class="form-group">
+                <label for="quoteApiKey">Finnhub API Key</label>
+                <input type="password" id="quoteApiKey" autocomplete="new-password" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="window._hideModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    `);
+    document.getElementById('quoteApiForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const stockApiKey = document.getElementById('quoteApiKey').value.trim();
+        if (!stockApiKey) return;
+        try {
+            await update(dbRef('settings'), { stockApiKey });
+            hideModal();
+            showToast('Finnhub fallback saved. Refresh prices again.');
+        } catch (_) {
+            showToast('Could not save Finnhub key');
+        }
+    });
 };
 
 window._addInvestment = () => {

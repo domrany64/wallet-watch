@@ -19,7 +19,7 @@ A family budget and expense tracker that gives you a clear, real-time view of wh
 - **Quick Setup** — One-click preset to add all your accounts at once (16 pre-configured institutions)
 - **Multi-spender** — Track who spends what (e.g. you and your spouse)
 - **Savings goals** — Set targets with progress tracking, monthly contributions, and APY compound growth estimator. Goals show 🚀 early / ✅ on track / ⚠️ late status with color-coded borders
-- **Investment tracking** — Log stock/investment holdings with cost basis and current price (full precision, no rounding); live price refresh via Yahoo Finance with per-ticker log
+- **Investment tracking** — Log stock/investment holdings with cost basis and current price (full precision, no rounding); Yahoo Finance price refresh with optional independent Finnhub fallback and per-route error logs
 - **Per-category breakdown** — See spending distribution across 19 categories (groceries, dining, transport, etc.)
 - **Per-spender breakdown** — See who's spending what on the dashboard
 - **Month navigation** — Browse current and past months with full history
@@ -111,6 +111,16 @@ openssl enc -d -aes-256-cbc -pbkdf2 -iter 100000 \
 # Confirm valid JSON
 python3 -m json.tool /tmp/backup_test.json > /dev/null && echo "OK"
 ```
+
+## Stock Price Fallback Setup
+
+Yahoo Finance and public CORS proxies can time out or rate-limit requests. Corsproxy.io now requires an API key and is no longer used. Refresh tries Yahoo through two AllOrigins routes, then Finnhub if configured.
+
+1. Create an account at [Finnhub](https://finnhub.io/) and obtain an API key from its dashboard.
+2. Open **Savings → Refresh Prices → Configure Finnhub Fallback**.
+3. Enter the key, save, then refresh prices again.
+
+The key is stored in your private Firebase `settings.stockApiKey`, not in source code. This is a browser-side integration: the key is visible to your authenticated browser and sent to Finnhub, so use a dedicated quote-service key. Provider coverage, quote delays, and rate limits depend on your plan; unsupported symbols keep their existing saved prices. Logs identify the successful source or failed route. Returned price precision is preserved.
 
 ## Tools
 
